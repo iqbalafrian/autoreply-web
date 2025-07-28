@@ -1,124 +1,117 @@
-import React, { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoReply Editor</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 16px;
+      background-color: #fff;
+      font-size: 14px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .template-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .template-item div {
+      flex: 1;
+    }
+    .template-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2><b>AutoReply</b></h2>
 
-export default function AutoReplyEditor() {
-  const [templateTitle, setTemplateTitle] = useState("");
-  const [templateContent, setTemplateContent] = useState("");
-  const [templates, setTemplates] = useState([]);
-  const [selectedTemplates, setSelectedTemplates] = useState([]);
+  <input id="title" type="text" placeholder="Judul Template" />
+  <textarea id="content" placeholder="Isi Template" rows="3"></textarea>
+  <button onclick="saveTemplate()">Simpan</button>
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("templates")) || [];
-    setTemplates(stored);
-  }, []);
+  <div id="templateContainer"></div>
 
-  const saveTemplate = () => {
-    if (!templateTitle.trim() || !templateContent.trim()) {
-      alert("Judul dan isi template tidak boleh kosong!");
-      return;
+  <script>
+    const titleInput = document.getElementById("title");
+    const contentInput = document.getElementById("content");
+    const container = document.getElementById("templateContainer");
+
+    let templates = JSON.parse(localStorage.getItem("templates")) || [];
+    let selected = [];
+
+    function renderTemplates() {
+      container.innerHTML = "";
+      if (templates.length === 0) return;
+
+      const selectAllBox = document.createElement("div");
+      selectAllBox.innerHTML = `
+        <label><input type="checkbox" onchange="toggleSelectAll(this)"> Pilih Semua</label>
+        <div class="template-list" id="list"></div>
+        <button onclick="deleteSelected()">Hapus Dipilih</button>
+      `;
+      container.appendChild(selectAllBox);
+
+      const list = document.getElementById("list");
+      templates.forEach((tpl, i) => {
+        const item = document.createElement("label");
+        item.className = "template-item";
+        item.innerHTML = `
+          <input type="checkbox" onchange="toggle(${i})" ${selected.includes(i) ? "checked" : ""}/>
+          <div>
+            <div><b>${tpl.title}</b></div>
+            <div style="font-size: 12px; color: gray">${tpl.content.length > 60 ? tpl.content.substring(0, 60) + "..." : tpl.content}</div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
     }
 
-    const newTemplate = { title: templateTitle, content: templateContent };
-    const updated = [...templates, newTemplate];
-    setTemplates(updated);
-    localStorage.setItem("templates", JSON.stringify(updated));
-    setTemplateTitle("");
-    setTemplateContent("");
-  };
+    function saveTemplate() {
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      if (!title || !content) {
+        alert("Judul dan isi template tidak boleh kosong!");
+        return;
+      }
+      templates.push({ title, content });
+      localStorage.setItem("templates", JSON.stringify(templates));
+      titleInput.value = "";
+      contentInput.value = "";
+      renderTemplates();
+    }
 
-  const deleteSelectedTemplates = () => {
-    const filtered = templates.filter((_, i) => !selectedTemplates.includes(i));
-    setTemplates(filtered);
-    localStorage.setItem("templates", JSON.stringify(filtered));
-    setSelectedTemplates([]);
-  };
+    function toggle(index) {
+      if (selected.includes(index)) {
+        selected = selected.filter(i => i !== index);
+      } else {
+        selected.push(index);
+      }
+    }
 
-  const toggleSelect = (index) => {
-    setSelectedTemplates((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
-    );
-  };
+    function toggleSelectAll(el) {
+      selected = el.checked ? templates.map((_, i) => i) : [];
+      renderTemplates();
+    }
 
-  const toggleSelectAll = () => {
-    setSelectedTemplates(
-      selectedTemplates.length === templates.length
-        ? []
-        : templates.map((_, i) => i)
-    );
-  };
+    function deleteSelected() {
+      templates = templates.filter((_, i) => !selected.includes(i));
+      localStorage.setItem("templates", JSON.stringify(templates));
+      selected = [];
+      renderTemplates();
+    }
 
-  return (
-    <div className="min-h-screen bg-white text-sm p-4">
-      <h2 className="font-bold text-lg mb-2">AutoReply</h2>
-
-      <input
-        type="text"
-        placeholder="Judul Template"
-        className="border p-1 rounded w-full mb-2"
-        value={templateTitle}
-        onChange={(e) => setTemplateTitle(e.target.value)}
-      />
-
-      <textarea
-        placeholder="Isi Template"
-        className="border p-1 rounded w-full mb-2"
-        rows={3}
-        value={templateContent}
-        onChange={(e) => setTemplateContent(e.target.value)}
-      />
-
-      <button
-        onClick={saveTemplate}
-        className="bg-blue-500 text-white w-full py-1 rounded mb-3"
-      >
-        Simpan
-      </button>
-
-      {templates.length > 0 && (
-        <>
-          <label className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={selectedTemplates.length === templates.length}
-              onChange={toggleSelectAll}
-              className="mr-2"
-            />
-            Pilih Semua
-          </label>
-
-          <div className="space-y-1 max-h-60 overflow-y-auto mb-2">
-            {templates.map((tpl, index) => (
-              <label
-                key={index}
-                className="flex items-start space-x-2"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedTemplates.includes(index)}
-                  onChange={() => toggleSelect(index)}
-                  className="mt-1"
-                />
-                <div>
-                  <div className="font-medium">{tpl.title}</div>
-                  <div className="text-gray-600 text-xs">
-                    {tpl.content.length > 60
-                      ? tpl.content.substring(0, 60) + "..."
-                      : tpl.content}
-                  </div>
-                </div>
-              </label>
-            ))}
-          </div>
-
-          <button
-            onClick={deleteSelectedTemplates}
-            className="bg-red-500 text-white w-full py-1 rounded"
-          >
-            KOntol Dipilih
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
+    renderTemplates();
+  </script>
+</body>
+</html>
