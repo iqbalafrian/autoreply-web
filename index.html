@@ -2,18 +2,19 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Autoreply Editor</title>
   <style>
     body {
       font-family: sans-serif;
       margin: 0;
-      padding: 2rem;
+      padding: 1rem;
       background: #f5f5f5;
       color: #333;
     }
     h1 {
       text-align: center;
+      font-size: 1.25rem;
     }
     .container {
       max-width: 500px;
@@ -23,54 +24,87 @@
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    textarea, input {
+    input[type="text"],
+    textarea {
       width: 100%;
-      padding: 0.75rem;
-      margin: 0.5rem 0;
+      padding: 0.4rem;
+      margin: 0.3rem 0;
       border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.8rem;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
     }
     button {
       background-color: #3b82f6;
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
+      padding: 0.4rem 0.8rem;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.8rem;
       cursor: pointer;
     }
     .reply-item {
       background: #f0f0f0;
-      padding: 0.75rem;
+      padding: 0.5rem;
       border-radius: 8px;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .reply-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .reply-item .title {
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .reply-item .text-preview {
+      color: #666;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .reply-item .actions {
+      display: flex;
+      gap: 0.3rem;
     }
     .reply-item button {
       background: #ef4444;
-      font-size: 0.8rem;
-      padding: 0.3rem 0.6rem;
-      margin-left: 0.5rem;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.5rem;
     }
     .bulk-delete {
       margin-top: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
     }
     .bulk-delete button {
       background-color: #ef4444;
-      font-size: 0.9rem;
+      font-size: 0.75rem;
+    }
+    input[type="checkbox"] {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>✏️ AutoReply Editor</h1>
-    <textarea id="newReply" placeholder="Tulis template baru..."></textarea>
+    <input type="text" id="newReplyTitle" placeholder="Judul template..." />
+    <textarea id="newReply" placeholder="Isi template..."></textarea>
     <button onclick="addReply()">Simpan Template 🔒</button>
 
     <h3>📋 Daftar Template:</h3>
@@ -92,44 +126,59 @@
         const div = document.createElement("div");
         div.className = "reply-item";
 
-        const span = document.createElement("span");
-        span.textContent = reply;
-
-        const buttons = document.createElement("div");
-
-        const copyBtn = document.createElement("button");
-        copyBtn.textContent = "📋";
-        copyBtn.onclick = () => copyReply(reply);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Hapus";
-        deleteBtn.onclick = () => deleteReply(index);
-
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "select-reply";
         checkbox.dataset.index = index;
 
-        buttons.appendChild(copyBtn);
-        buttons.appendChild(deleteBtn);
+        const content = document.createElement("div");
+        content.className = "reply-content";
 
-        div.prepend(checkbox);
-        div.appendChild(span);
-        div.appendChild(buttons);
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "title";
+        titleSpan.textContent = reply.title || "(Tanpa Judul)";
 
+        const previewSpan = document.createElement("span");
+        previewSpan.className = "text-preview";
+        previewSpan.textContent = reply.text.length > 60 ? reply.text.substring(0, 60) + '...' : reply.text;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "📋";
+        copyBtn.onclick = () => copyReply(reply.text);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Hapus";
+        deleteBtn.onclick = () => deleteReply(index);
+
+        actions.appendChild(copyBtn);
+        actions.appendChild(deleteBtn);
+
+        content.appendChild(titleSpan);
+        content.appendChild(previewSpan);
+        content.appendChild(actions);
+
+        div.appendChild(checkbox);
+        div.appendChild(content);
         listContainer.appendChild(div);
       });
     }
 
     function addReply() {
-      const input = document.getElementById("newReply");
-      const text = input.value.trim();
-      if (!text) return alert("Isi dulu dong!");
+      const inputTitle = document.getElementById("newReplyTitle");
+      const inputText = document.getElementById("newReply");
+      const title = inputTitle.value.trim();
+      const text = inputText.value.trim();
+
+      if (!text) return alert("Isi teks tidak boleh kosong!");
 
       const replies = JSON.parse(localStorage.getItem("replies") || "[]");
-      replies.push(text);
+      replies.push({ title, text });
       localStorage.setItem("replies", JSON.stringify(replies));
-      input.value = "";
+      inputTitle.value = "";
+      inputText.value = "";
       loadReplies();
     }
 
