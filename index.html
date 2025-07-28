@@ -1,277 +1,105 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AutoReply Editor</title>
-
-  <link rel="apple-touch-icon" href="icon.png" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="AutoReply" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta charset="UTF-8">
+  <title>AutoReply Templat</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 16px;
-      background-color: var(--bg);
-      color: var(--text);
-      transition: background-color 0.3s ease, color 0.3s ease;
+      font-family: sans-serif;
+      margin: 1rem;
     }
-    input[type="text"], input[type="number"], textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 8px;
+    .template {
+      margin: 1rem 0;
+      padding: 0.5rem;
       border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .actions {
+      margin-top: 0.5rem;
+    }
+    .actions button {
+      margin-right: 0.5rem;
+    }
+    .highlight {
+      background-color: #d4edda;
+      padding: 0.2rem 0.4rem;
       border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button.save {
-      width: 100%;
-      background-color: #3b82f6;
-      margin-top: 8px;
-    }
-    button.delete {
-      width: 100%;
-      background-color: #ef4444;
-      margin-top: 8px;
-    }
-    button.copy {
-      background-color: #10b981;
-      margin-left: 4px;
-      padding: 4px 8px;
-      font-size: 0.875rem;
-    }
-    button.edit {
-      background-color: #f59e0b;
-      margin-left: 4px;
-      padding: 4px 8px;
-      font-size: 0.875rem;
-    }
-    button.send {
-      background-color: #6366f1;
-      margin-top: 10px;
-      width: 100%;
-    }
-    .template-item {
-      background: var(--card);
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .template-content {
-      flex-grow: 1;
-      margin-left: 8px;
-    }
-    .checkbox-container {
-      display: flex;
-      align-items: center;
-    }
-    .button-group {
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 4px;
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-    }
-    .dark-mode-toggle {
-      font-size: 14px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      background: #555;
-      color: #fff;
-      cursor: pointer;
-    }
-    #sentCount {
-      margin-top: 8px;
-      font-size: 0.9rem;
-      color: #555;
-    }
-    :root {
-      --bg: #f9f9f9;
-      --text: #000;
-      --card: #fff;
-    }
-    .dark {
-      --bg: #1a1a1a;
-      --text: #f1f1f1;
-      --card: #2c2c2c;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
-  <div class="toolbar">
-    <h2>AutoReply</h2>
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
-  </div>
-  <input type="text" id="title" placeholder="Judul Template" />
-  <textarea id="content" rows="3" placeholder="Isi Template"></textarea>
-  <button class="save" onclick="saveTemplate()">Simpan</button>
-  <input type="text" id="search" placeholder="Cari template..." oninput="renderTemplates()" />
-  <label><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /> Pilih Semua</label>
+
+  <h2>Daftar Templat</h2>
   <div id="templateList"></div>
-  <button class="delete" onclick="deleteSelectedTemplates()">Hapus Dipilih</button>
-  <input type="number" id="messageCount" placeholder="Jumlah pesan yang ingin dikirim" min="1" style="margin-top: 10px;" />
-  <button class="send" onclick="sendToWhatsApp()">Spam Kirim ke WhatsApp</button>
-  <div id="sentCount">Pesan terkirim: 0 | Gagal: 0</div>
+
+  <h3>Tambah Templat</h3>
+  <input type="text" id="templateTitle" placeholder="Judul"><br><br>
+  <textarea id="templateContent" rows="4" placeholder="Isi templat"></textarea><br><br>
+  <button onclick="addTemplate()">Tambah</button>
 
   <script>
-    let templates = JSON.parse(localStorage.getItem("templates")) || [];
-    let selectedTemplates = [];
-    let dark = false;
-    let sentCount = 0;
-    let failedCount = 0;
+    const templateList = document.getElementById('templateList');
 
-    function renderTemplates() {
-      const search = document.getElementById("search").value.toLowerCase();
-      const list = document.getElementById("templateList");
-      list.innerHTML = "";
-      templates
-        .map((tpl, idx) => ({ tpl, idx }))
-        .filter(({ tpl }) =>
-          tpl.title.toLowerCase().includes(search) || tpl.content.toLowerCase().includes(search)
-        )
-        .forEach(({ tpl, idx }) => {
-          const item = document.createElement("div");
-          item.className = "template-item";
-
-          const checkboxContainer = document.createElement("div");
-          checkboxContainer.className = "checkbox-container";
-
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.checked = selectedTemplates.includes(idx);
-          checkbox.onchange = () => toggleSelect(idx);
-          checkboxContainer.appendChild(checkbox);
-
-          const content = document.createElement("div");
-          content.className = "template-content";
-          content.innerHTML = `<strong>${tpl.title}</strong><br><small>${tpl.content.length > 60 ? tpl.content.substring(0, 60) + "..." : tpl.content}</small>`;
-
-          const buttonGroup = document.createElement("div");
-          buttonGroup.className = "button-group";
-
-          const editBtn = document.createElement("button");
-          editBtn.textContent = "Edit";
-          editBtn.className = "edit";
-          editBtn.onclick = () => editTemplate(idx);
-
-          const copyBtn = document.createElement("button");
-          copyBtn.textContent = "Salin";
-          copyBtn.className = "copy";
-          copyBtn.onclick = () => {
-            navigator.clipboard.writeText(tpl.content);
-            copyBtn.textContent = "✅";
-            setTimeout(() => (copyBtn.textContent = "Salin"), 1500);
-          };
-
-          buttonGroup.appendChild(copyBtn);
-          buttonGroup.appendChild(editBtn);
-
-          item.appendChild(checkboxContainer);
-          item.appendChild(content);
-          item.appendChild(buttonGroup);
-
-          list.appendChild(item);
-        });
+    function loadTemplates() {
+      const templates = JSON.parse(localStorage.getItem('templates')) || [];
+      templateList.innerHTML = '';
+      templates.forEach((tpl, i) => {
+        const div = document.createElement('div');
+        div.className = 'template';
+        div.innerHTML = `
+          <strong>${tpl.title}</strong><br>
+          <div>${tpl.content}</div>
+          <div class="actions">
+            <button onclick="copyTemplate(${i})">Salin</button>
+            <button onclick="editTemplate(${i})">Edit</button>
+            <button onclick="deleteTemplate(${i})">Hapus</button>
+          </div>
+        `;
+        templateList.appendChild(div);
+      });
     }
 
-    function saveTemplate() {
-      const title = document.getElementById("title").value.trim();
-      const content = document.getElementById("content").value.trim();
-      if (!title || !content) {
-        alert("Judul dan isi template tidak boleh kosong!");
-        return;
-      }
+    function addTemplate() {
+      const title = document.getElementById('templateTitle').value.trim();
+      const content = document.getElementById('templateContent').value.trim();
+      if (!title || !content) return alert('Isi judul dan konten');
+
+      const templates = JSON.parse(localStorage.getItem('templates')) || [];
       templates.push({ title, content });
-      localStorage.setItem("templates", JSON.stringify(templates));
-      document.getElementById("title").value = "";
-      document.getElementById("content").value = "";
-      renderTemplates();
+      localStorage.setItem('templates', JSON.stringify(templates));
+      document.getElementById('templateTitle').value = '';
+      document.getElementById('templateContent').value = '';
+      loadTemplates();
     }
 
-    function editTemplate(index) {
-      const tpl = templates[index];
-      document.getElementById("title").value = tpl.title;
-      document.getElementById("content").value = tpl.content;
-      templates.splice(index, 1);
-      localStorage.setItem("templates", JSON.stringify(templates));
-      renderTemplates();
+    function copyTemplate(i) {
+      const templates = JSON.parse(localStorage.getItem('templates')) || [];
+      const content = templates[i].content;
+      navigator.clipboard.writeText(content).then(() => alert('Tersalin'));
     }
 
-    function toggleSelect(index) {
-      if (selectedTemplates.includes(index)) {
-        selectedTemplates = selectedTemplates.filter(i => i !== index);
-      } else {
-        selectedTemplates.push(index);
+    function editTemplate(i) {
+      const templates = JSON.parse(localStorage.getItem('templates')) || [];
+      const newTitle = prompt('Edit judul:', templates[i].title);
+      const newContent = prompt('Edit isi:', templates[i].content);
+      if (newTitle && newContent) {
+        templates[i] = { title: newTitle, content: newContent };
+        localStorage.setItem('templates', JSON.stringify(templates));
+        loadTemplates();
       }
     }
 
-    function toggleSelectAll() {
-      if (selectedTemplates.length === templates.length) {
-        selectedTemplates = [];
-      } else {
-        selectedTemplates = templates.map((_, i) => i);
-      }
-      renderTemplates();
-      document.getElementById("selectAll").checked = selectedTemplates.length === templates.length;
+    function deleteTemplate(i) {
+      if (!confirm('Hapus templat ini?')) return;
+      const templates = JSON.parse(localStorage.getItem('templates')) || [];
+      templates.splice(i, 1);
+      localStorage.setItem('templates', JSON.stringify(templates));
+      loadTemplates();
     }
 
-    function deleteSelectedTemplates() {
-      templates = templates.filter((_, i) => !selectedTemplates.includes(i));
-      selectedTemplates = [];
-      localStorage.setItem("templates", JSON.stringify(templates));
-      renderTemplates();
-    }
-
-    async function sendToWhatsApp() {
-      if (selectedTemplates.length === 0) {
-        alert("Pilih minimal satu template dulu.");
-        return;
-      }
-
-      const jumlah = parseInt(document.getElementById("messageCount").value) || 1;
-      const template = templates[selectedTemplates[0]];
-      const message = encodeURIComponent(template.content);
-      const url = `https://wa.me/?text=${message}`;
-
-      sentCount = 0;
-      failedCount = 0;
-
-      for (let i = 0; i < jumlah; i++) {
-        try {
-          window.open(url, '_blank');
-          sentCount++;
-        } catch {
-          failedCount++;
-        }
-      }
-      document.getElementById("sentCount").textContent = `Pesan terkirim: ${sentCount} | Gagal: ${failedCount}`;
-    }
-
-    function toggleDarkMode() {
-      dark = !dark;
-      document.body.classList.toggle("dark", dark);
-    }
-
-    renderTemplates();
+    loadTemplates();
   </script>
 </body>
 </html>
