@@ -58,6 +58,12 @@
       padding: 4px 8px;
       font-size: 0.875rem;
     }
+    button.wa {
+      background-color: #25d366;
+      margin-left: 4px;
+      padding: 4px 8px;
+      font-size: 0.875rem;
+    }
     .template-item {
       background: var(--card);
       padding: 8px;
@@ -168,6 +174,15 @@
             setTimeout(() => (copyBtn.textContent = "Salin"), 1500);
           };
 
+          const waBtn = document.createElement("button");
+          waBtn.textContent = "Kirim ke WA";
+          waBtn.className = "wa";
+          waBtn.onclick = () => {
+            const message = encodeURIComponent(tpl.content);
+            window.open(`https://wa.me/?text=${message}`, "_blank");
+          };
+
+          buttonGroup.appendChild(waBtn);
           buttonGroup.appendChild(copyBtn);
           buttonGroup.appendChild(editBtn);
 
