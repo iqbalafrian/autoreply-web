@@ -8,7 +8,9 @@
     body {
       font-family: Arial, sans-serif;
       padding: 16px;
-      background-color: #f9f9f9;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     input[type="text"], textarea {
       width: 100%;
@@ -42,8 +44,14 @@
       padding: 4px 8px;
       font-size: 0.875rem;
     }
+    button.edit {
+      background-color: #f59e0b;
+      margin-left: 8px;
+      padding: 4px 8px;
+      font-size: 0.875rem;
+    }
     .template-item {
-      background: white;
+      background: var(--card);
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
@@ -60,13 +68,41 @@
       display: flex;
       align-items: center;
     }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .dark-mode-toggle {
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #555;
+      color: #fff;
+      cursor: pointer;
+    }
+    :root {
+      --bg: #f9f9f9;
+      --text: #000;
+      --card: #fff;
+    }
+    .dark {
+      --bg: #1a1a1a;
+      --text: #f1f1f1;
+      --card: #2c2c2c;
+    }
   </style>
 </head>
 <body>
-  <h2>AutoReply</h2>
+  <div class="toolbar">
+    <h2>AutoReply</h2>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+  </div>
   <input type="text" id="title" placeholder="Judul Template" />
   <textarea id="content" rows="3" placeholder="Isi Template"></textarea>
   <button class="save" onclick="saveTemplate()">Simpan</button>
+  <input type="text" id="search" placeholder="Cari template..." oninput="renderTemplates()" />
   <label><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /> Pilih Semua</label>
   <div id="templateList"></div>
   <button class="delete" onclick="deleteSelectedTemplates()">Hapus Dipilih</button>
@@ -74,37 +110,55 @@
   <script>
     let templates = JSON.parse(localStorage.getItem("templates")) || [];
     let selectedTemplates = [];
+    let dark = false;
 
     function renderTemplates() {
+      const search = document.getElementById("search").value.toLowerCase();
       const list = document.getElementById("templateList");
       list.innerHTML = "";
-      templates.forEach((tpl, index) => {
-        const item = document.createElement("div");
-        item.className = "template-item";
+      templates
+        .map((tpl, idx) => ({ tpl, idx }))
+        .filter(({ tpl }) =>
+          tpl.title.toLowerCase().includes(search) || tpl.content.toLowerCase().includes(search)
+        )
+        .forEach(({ tpl, idx }) => {
+          const item = document.createElement("div");
+          item.className = "template-item";
 
-        const checkboxContainer = document.createElement("div");
-        checkboxContainer.className = "checkbox-container";
+          const checkboxContainer = document.createElement("div");
+          checkboxContainer.className = "checkbox-container";
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = selectedTemplates.includes(index);
-        checkbox.onchange = () => toggleSelect(index);
-        checkboxContainer.appendChild(checkbox);
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = selectedTemplates.includes(idx);
+          checkbox.onchange = () => toggleSelect(idx);
+          checkboxContainer.appendChild(checkbox);
 
-        const content = document.createElement("div");
-        content.className = "template-content";
-        content.innerHTML = `<strong>${tpl.title}</strong><br><small>${tpl.content.length > 60 ? tpl.content.substring(0, 60) + "..." : tpl.content}</small>`;
+          const content = document.createElement("div");
+          content.className = "template-content";
+          content.innerHTML = `<strong>${tpl.title}</strong><br><small>${tpl.content.length > 60 ? tpl.content.substring(0, 60) + "..." : tpl.content}</small>`;
 
-        const copyBtn = document.createElement("button");
-        copyBtn.textContent = "Salin";
-        copyBtn.className = "copy";
-        copyBtn.onclick = () => navigator.clipboard.writeText(tpl.content);
+          const copyBtn = document.createElement("button");
+          copyBtn.textContent = "Salin";
+          copyBtn.className = "copy";
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(tpl.content);
+            copyBtn.textContent = "✅";
+            setTimeout(() => (copyBtn.textContent = "Salin"), 1500);
+          };
 
-        item.appendChild(checkboxContainer);
-        item.appendChild(content);
-        item.appendChild(copyBtn);
-        list.appendChild(item);
-      });
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.className = "edit";
+          editBtn.onclick = () => editTemplate(idx);
+
+          item.appendChild(checkboxContainer);
+          item.appendChild(content);
+          item.appendChild(copyBtn);
+          item.appendChild(editBtn);
+
+          list.appendChild(item);
+        });
     }
 
     function saveTemplate() {
@@ -118,6 +172,15 @@
       localStorage.setItem("templates", JSON.stringify(templates));
       document.getElementById("title").value = "";
       document.getElementById("content").value = "";
+      renderTemplates();
+    }
+
+    function editTemplate(index) {
+      const tpl = templates[index];
+      document.getElementById("title").value = tpl.title;
+      document.getElementById("content").value = tpl.content;
+      templates.splice(index, 1);
+      localStorage.setItem("templates", JSON.stringify(templates));
       renderTemplates();
     }
 
@@ -144,6 +207,11 @@
       selectedTemplates = [];
       localStorage.setItem("templates", JSON.stringify(templates));
       renderTemplates();
+    }
+
+    function toggleDarkMode() {
+      dark = !dark;
+      document.body.classList.toggle("dark", dark);
     }
 
     renderTemplates();
