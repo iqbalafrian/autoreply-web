@@ -18,7 +18,7 @@
       color: var(--text);
       transition: background-color 0.3s ease, color 0.3s ease;
     }
-    input[type="text"], textarea {
+    input[type="text"], input[type="number"], textarea {
       width: 100%;
       padding: 8px;
       margin-bottom: 8px;
@@ -128,14 +128,16 @@
   <label><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /> Pilih Semua</label>
   <div id="templateList"></div>
   <button class="delete" onclick="deleteSelectedTemplates()">Hapus Dipilih</button>
-  <button class="send" onclick="sendToWhatsApp()">Kirim ke WhatsApp</button>
-  <div id="sentCount">Pesan terkirim: 0</div>
+  <input type="number" id="messageCount" placeholder="Jumlah pesan yang ingin dikirim" min="1" style="margin-top: 10px;" />
+  <button class="send" onclick="sendToWhatsApp()">Spam Kirim ke WhatsApp</button>
+  <div id="sentCount">Pesan terkirim: 0 | Gagal: 0</div>
 
   <script>
     let templates = JSON.parse(localStorage.getItem("templates")) || [];
     let selectedTemplates = [];
     let dark = false;
     let sentCount = 0;
+    let failedCount = 0;
 
     function renderTemplates() {
       const search = document.getElementById("search").value.toLowerCase();
@@ -239,17 +241,29 @@
       renderTemplates();
     }
 
-    function sendToWhatsApp() {
+    async function sendToWhatsApp() {
       if (selectedTemplates.length === 0) {
         alert("Pilih minimal satu template dulu.");
         return;
       }
+
+      const jumlah = parseInt(document.getElementById("messageCount").value) || 1;
       const template = templates[selectedTemplates[0]];
       const message = encodeURIComponent(template.content);
       const url = `https://wa.me/?text=${message}`;
-      window.open(url, '_blank');
-      sentCount++;
-      document.getElementById("sentCount").textContent = `Pesan terkirim: ${sentCount}`;
+
+      sentCount = 0;
+      failedCount = 0;
+
+      for (let i = 0; i < jumlah; i++) {
+        try {
+          window.open(url, '_blank');
+          sentCount++;
+        } catch {
+          failedCount++;
+        }
+      }
+      document.getElementById("sentCount").textContent = `Pesan terkirim: ${sentCount} | Gagal: ${failedCount}`;
     }
 
     function toggleDarkMode() {
