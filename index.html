@@ -3,31 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>AutoReply Template</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-      background: var(--bg);
-      color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
     :root {
-      --bg: #fff;
-      --text: #000;
+      --bg: #ffffff;
+      --text: #000000;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #111;
-        --text: #fff;
+        --bg: #111111;
+        --text: #ffffff;
       }
     }
-    .template {
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: sans-serif;
+      padding: 1rem;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    h2, h3 {
+      margin-top: 1rem;
+    }
+    input, textarea {
+      width: 100%;
       padding: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .template {
+      background: #f2f2f2;
       margin: 1rem 0;
-      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
     }
     .template-title {
       font-weight: bold;
@@ -35,22 +48,20 @@
     }
     .template-content {
       white-space: pre-wrap;
+      margin-bottom: 0.5rem;
     }
     .actions button {
       margin-right: 0.5rem;
     }
-    input, textarea {
-      width: 100%;
+    button {
+      padding: 0.4rem 0.8rem;
       font-size: 1rem;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
-      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <h2>📋 Daftar Templat</h2>
-  <input type="text" id="searchBox" placeholder="🔍 Cari templat..." oninput="loadTemplates()"><br><br>
+  <input type="text" id="searchBox" placeholder="🔍 Cari templat..." oninput="loadTemplates()"><br>
 
   <div id="templateList"></div>
 
