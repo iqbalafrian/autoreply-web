@@ -26,6 +26,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
+      font-size: 16px; /* Tambahan untuk mencegah zoom di iOS */
     }
     button {
       padding: 10px;
@@ -153,6 +154,11 @@
           const buttonGroup = document.createElement("div");
           buttonGroup.className = "button-group";
 
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.className = "edit";
+          editBtn.onclick = () => editTemplate(idx);
+
           const copyBtn = document.createElement("button");
           copyBtn.textContent = "Salin";
           copyBtn.className = "copy";
@@ -162,13 +168,8 @@
             setTimeout(() => (copyBtn.textContent = "Salin"), 1500);
           };
 
-          const editBtn = document.createElement("button");
-          editBtn.textContent = "Edit";
-          editBtn.className = "edit";
-          editBtn.onclick = () => editTemplate(idx);
-
-          buttonGroup.appendChild(copyBtn);
           buttonGroup.appendChild(editBtn);
+          buttonGroup.appendChild(copyBtn);
 
           item.appendChild(checkboxContainer);
           item.appendChild(content);
