@@ -77,7 +77,8 @@
 <body>
     <header>AutoReply</header>
     <main>
-        <textarea id="templateInput" rows="3" placeholder="Tulis template kamu di sini..."></textarea>
+        <input type="text" id="phraseInput" placeholder="Masukkan frasa/kata kunci...">
+        <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
         <button class="primary" onclick="addTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
@@ -95,7 +96,7 @@
         function renderTemplates() {
             const container = document.getElementById("templates");
             container.innerHTML = "";
-            templates.forEach((text, index) => {
+            templates.forEach((item, index) => {
                 const div = document.createElement("div");
                 div.className = "template";
 
@@ -105,11 +106,11 @@
 
                 const span = document.createElement("span");
                 span.className = "template-content";
-                span.textContent = text;
+                span.textContent = `${item.phrase} → ${item.text}`;
 
                 const copyBtn = document.createElement("button");
                 copyBtn.textContent = "Salin";
-                copyBtn.onclick = () => copyToClipboard(text);
+                copyBtn.onclick = () => copyToClipboard(item.text);
 
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Edit";
@@ -124,13 +125,16 @@
         }
 
         function addTemplate() {
-            const input = document.getElementById("templateInput");
-            const text = input.value.trim();
-            if (text) {
-                templates.push(text);
+            const phraseInput = document.getElementById("phraseInput");
+            const templateInput = document.getElementById("templateInput");
+            const phrase = phraseInput.value.trim();
+            const text = templateInput.value.trim();
+            if (phrase && text) {
+                templates.push({ phrase, text });
                 saveTemplates();
                 renderTemplates();
-                input.value = "";
+                phraseInput.value = "";
+                templateInput.value = "";
             }
         }
 
@@ -153,9 +157,11 @@
         }
 
         function editTemplate(index) {
-            const newText = prompt("Edit template:", templates[index]);
-            if (newText !== null) {
-                templates[index] = newText;
+            const current = templates[index];
+            const newPhrase = prompt("Edit frasa:", current.phrase);
+            const newText = prompt("Edit isi template:", current.text);
+            if (newPhrase !== null && newText !== null) {
+                templates[index] = { phrase: newPhrase, text: newText };
                 saveTemplates();
                 renderTemplates();
             }
