@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AutoReply Editor</title>
+
+  <!-- Tambahan untuk mode fullscreen saat Add to Home Screen -->
+  <link rel="apple-touch-icon" href="icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="AutoReply" />
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -40,13 +47,13 @@
     }
     button.copy {
       background-color: #10b981;
-      margin-left: 8px;
+      margin-left: 4px;
       padding: 4px 8px;
       font-size: 0.875rem;
     }
     button.edit {
       background-color: #f59e0b;
-      margin-left: 8px;
+      margin-left: 4px;
       padding: 4px 8px;
       font-size: 0.875rem;
     }
@@ -67,6 +74,11 @@
     .checkbox-container {
       display: flex;
       align-items: center;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     .toolbar {
       display: flex;
@@ -138,6 +150,9 @@
           content.className = "template-content";
           content.innerHTML = `<strong>${tpl.title}</strong><br><small>${tpl.content.length > 60 ? tpl.content.substring(0, 60) + "..." : tpl.content}</small>`;
 
+          const buttonGroup = document.createElement("div");
+          buttonGroup.className = "button-group";
+
           const copyBtn = document.createElement("button");
           copyBtn.textContent = "Salin";
           copyBtn.className = "copy";
@@ -152,10 +167,12 @@
           editBtn.className = "edit";
           editBtn.onclick = () => editTemplate(idx);
 
+          buttonGroup.appendChild(copyBtn);
+          buttonGroup.appendChild(editBtn);
+
           item.appendChild(checkboxContainer);
           item.appendChild(content);
-          item.appendChild(copyBtn);
-          item.appendChild(editBtn);
+          item.appendChild(buttonGroup);
 
           list.appendChild(item);
         });
