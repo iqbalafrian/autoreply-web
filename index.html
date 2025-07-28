@@ -77,7 +77,7 @@
 <body>
     <header>AutoReply</header>
     <main>
-        <input type="text" id="phraseInput" placeholder="Masukkan frasa/kata kunci...">
+        <input type="text" id="titleInput" placeholder="Masukkan judul/kata kunci...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
         <button class="primary" onclick="addTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
@@ -106,7 +106,7 @@
 
                 const span = document.createElement("span");
                 span.className = "template-content";
-                span.textContent = `${item.phrase} → ${item.text}`;
+                span.textContent = `${item.title} → ${item.text}`;
 
                 const copyBtn = document.createElement("button");
                 copyBtn.textContent = "Salin";
@@ -125,15 +125,15 @@
         }
 
         function addTemplate() {
-            const phraseInput = document.getElementById("phraseInput");
+            const titleInput = document.getElementById("titleInput");
             const templateInput = document.getElementById("templateInput");
-            const phrase = phraseInput.value.trim();
+            const title = titleInput.value.trim();
             const text = templateInput.value.trim();
-            if (phrase && text) {
-                templates.push({ phrase, text });
+            if (title && text) {
+                templates.push({ title, text });
                 saveTemplates();
                 renderTemplates();
-                phraseInput.value = "";
+                titleInput.value = "";
                 templateInput.value = "";
             }
         }
@@ -158,10 +158,10 @@
 
         function editTemplate(index) {
             const current = templates[index];
-            const newPhrase = prompt("Edit frasa:", current.phrase);
+            const newTitle = prompt("Edit judul:", current.title);
             const newText = prompt("Edit isi template:", current.text);
-            if (newPhrase !== null && newText !== null) {
-                templates[index] = { phrase: newPhrase, text: newText };
+            if (newTitle !== null && newText !== null) {
+                templates[index] = { title: newTitle, text: newText };
                 saveTemplates();
                 renderTemplates();
             }
