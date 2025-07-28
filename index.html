@@ -2,12 +2,17 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoReply Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AutoReply">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3094/3094837.png">
+  <title>AutoReply</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 16px;
+      margin: 0;
       background-color: #f9f9f9;
     }
     input[type="text"], textarea {
@@ -28,17 +33,13 @@
       font-weight: bold;
       cursor: pointer;
     }
-    button.save {
-      background-color: #3b82f6;
-    }
-    button.delete {
-      background-color: #ef4444;
-    }
+    button.save { background-color: #3b82f6; }
+    button.delete { background-color: #ef4444; display: none; }
     button.copy {
       background-color: #10b981;
       margin-left: 8px;
-      width: auto;
       padding: 6px 10px;
+      font-size: 14px;
     }
     .template-item {
       background: white;
@@ -52,6 +53,10 @@
     .template-content {
       flex-grow: 1;
       margin-left: 8px;
+      font-size: 14px;
+    }
+    label input[type="checkbox"] {
+      margin-right: 4px;
     }
   </style>
 </head>
@@ -60,9 +65,10 @@
   <input type="text" id="title" placeholder="Judul Template" />
   <textarea id="content" rows="3" placeholder="Isi Template"></textarea>
   <button class="save" onclick="saveTemplate()">Simpan</button>
+
   <label><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /> Pilih Semua</label>
   <div id="templateList"></div>
-  <button class="delete" onclick="deleteSelectedTemplates()">Hapus Dipilih</button>
+  <button class="delete" id="deleteBtn" onclick="deleteSelectedTemplates()">Hapus Dipilih</button>
 
   <script>
     let templates = JSON.parse(localStorage.getItem("templates")) || [];
@@ -70,7 +76,13 @@
 
     function renderTemplates() {
       const list = document.getElementById("templateList");
+      const deleteBtn = document.getElementById("deleteBtn");
       list.innerHTML = "";
+      if (templates.length === 0) {
+        deleteBtn.style.display = "none";
+        return;
+      }
+      deleteBtn.style.display = "block";
       templates.forEach((tpl, index) => {
         const item = document.createElement("div");
         item.className = "template-item";
