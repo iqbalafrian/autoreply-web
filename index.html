@@ -71,13 +71,6 @@
             flex: 1;
             margin-right: 0.5rem;
         }
-
-        .template input[type="text"],
-        .template textarea {
-            margin-top: 0.5rem;
-            width: 100%;
-            font-size: 1rem;
-        }
     </style>
 </head>
 
@@ -86,7 +79,7 @@
     <main>
         <input type="text" id="titleInput" placeholder="Masukkan judul...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
-        <button class="primary" onclick="addTemplate()">Tambah Template</button>
+        <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
 
@@ -95,6 +88,7 @@
 
     <script>
         let templates = JSON.parse(localStorage.getItem("templates") || "[]");
+        let editingIndex = -1;
 
         function saveTemplates() {
             localStorage.setItem("templates", JSON.stringify(templates));
@@ -113,19 +107,11 @@
 
                 const contentDiv = document.createElement("div");
                 contentDiv.className = "template-content";
+                contentDiv.innerHTML = `<strong>${item.title}</strong><br>${item.text}`;
 
-                const titleInput = document.createElement("input");
-                titleInput.type = "text";
-                titleInput.value = item.title;
-                titleInput.oninput = (e) => updateTemplate(index, e.target.value, null);
-
-                const textArea = document.createElement("textarea");
-                textArea.rows = 2;
-                textArea.value = item.text;
-                textArea.oninput = (e) => updateTemplate(index, null, e.target.value);
-
-                contentDiv.appendChild(titleInput);
-                contentDiv.appendChild(textArea);
+                const editBtn = document.createElement("button");
+                editBtn.textContent = "Edit";
+                editBtn.onclick = () => editTemplate(index);
 
                 const copyBtn = document.createElement("button");
                 copyBtn.textContent = "Salin";
@@ -133,23 +119,39 @@
 
                 div.appendChild(checkbox);
                 div.appendChild(contentDiv);
+                div.appendChild(editBtn);
                 div.appendChild(copyBtn);
                 container.appendChild(div);
             });
         }
 
-        function addTemplate() {
+        function addOrUpdateTemplate() {
             const titleInput = document.getElementById("titleInput");
             const templateInput = document.getElementById("templateInput");
             const title = titleInput.value.trim();
             const text = templateInput.value.trim();
-            if (title && text) {
+            if (!title || !text) return;
+
+            if (editingIndex === -1) {
                 templates.push({ title, text });
-                saveTemplates();
-                renderTemplates();
-                titleInput.value = "";
-                templateInput.value = "";
+            } else {
+                templates[editingIndex] = { title, text };
+                editingIndex = -1;
+                document.getElementById("addBtn").textContent = "Tambah Template";
             }
+
+            saveTemplates();
+            renderTemplates();
+            titleInput.value = "";
+            templateInput.value = "";
+        }
+
+        function editTemplate(index) {
+            const item = templates[index];
+            document.getElementById("titleInput").value = item.title;
+            document.getElementById("templateInput").value = item.text;
+            editingIndex = index;
+            document.getElementById("addBtn").textContent = "Simpan Edit";
         }
 
         function deleteSelected() {
@@ -168,12 +170,6 @@
         function selectAll() {
             const checkboxes = document.querySelectorAll(".template-checkbox");
             checkboxes.forEach(cb => cb.checked = true);
-        }
-
-        function updateTemplate(index, newTitle, newText) {
-            if (newTitle !== null) templates[index].title = newTitle;
-            if (newText !== null) templates[index].text = newText;
-            saveTemplates();
         }
 
         function copyToClipboard(text) {
