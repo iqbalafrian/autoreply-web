@@ -1,174 +1,166 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AutoReply</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AutoReply</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
 
-    h2 {
-      margin-bottom: 20px;
-    }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
 
-    input[type="text"],
-    textarea,
-    input[type="search"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
+        main {
+            padding: 1rem;
+        }
 
-    button {
-      display: inline-block;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
 
-    .btn-primary {
-      background-color: #2d79f3;
-      color: white;
-      width: 100%;
-      margin-bottom: 10px;
-    }
+        button {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    .btn-danger {
-      background-color: #e74c3c;
-      color: white;
-      width: 100%;
-      margin-top: 10px;
-    }
+        .primary {
+            background-color: #007BFF;
+            color: white;
+        }
 
-    .template-item {
-      background: white;
-      padding: 10px;
-      margin-bottom: 5px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        .danger {
+            background-color: #dc3545;
+            color: white;
+        }
 
-    .template-actions button {
-      margin-left: 5px;
-    }
+        .template {
+            background-color: #e9f5ff;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    .btn-edit {
-      background-color: #f39c12;
-      color: white;
-    }
+        .template input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
 
-    .btn-copy {
-      background-color: #1abc9c;
-      color: white;
-    }
-
-    label {
-      font-size: 14px;
-    }
-  </style>
+        .template-content {
+            flex: 1;
+            margin-right: 0.5rem;
+        }
+    </style>
 </head>
+
 <body>
-  <h2>AutoReply</h2>
+    <header>AutoReply Template</header>
+    <main>
+        <textarea id="templateInput" rows="3" placeholder="Tulis template kamu di sini..."></textarea>
+        <button class="primary" onclick="addTemplate()">Tambah Template</button>
+        <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
+        <button onclick="selectAll()">Pilih Semua</button>
 
-  <input type="text" id="judul" placeholder="Judul Template">
-  <textarea id="isi" rows="3" placeholder="Isi Template"></textarea>
+        <div id="templates"></div>
+    </main>
 
-  <button class="btn-primary" onclick="simpanTemplate()">Simpan</button>
+    <script>
+        let templates = JSON.parse(localStorage.getItem("templates") || "[]");
 
-  <input type="search" id="search" placeholder="Cari template..." oninput="cariTemplate()">
+        function saveTemplates() {
+            localStorage.setItem("templates", JSON.stringify(templates));
+        }
 
-  <div>
-    <input type="checkbox" id="pilihSemua" onchange="togglePilihSemua(this)">
-    <label for="pilihSemua">Pilih Semua</label>
-  </div>
+        function renderTemplates() {
+            const container = document.getElementById("templates");
+            container.innerHTML = "";
+            templates.forEach((text, index) => {
+                const div = document.createElement("div");
+                div.className = "template";
 
-  <div id="daftarTemplate"></div>
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "template-checkbox";
 
-  <button class="btn-danger" onclick="hapusTerpilih()">Hapus Dipilih</button>
+                const span = document.createElement("span");
+                span.className = "template-content";
+                span.textContent = text;
 
-  <script>
-    let templates = JSON.parse(localStorage.getItem('templates')) || [];
+                const copyBtn = document.createElement("button");
+                copyBtn.textContent = "Salin";
+                copyBtn.onclick = () => copyToClipboard(text);
 
-    function renderTemplates() {
-      const container = document.getElementById('daftarTemplate');
-      container.innerHTML = '';
-      templates.forEach((t, i) => {
-        const div = document.createElement('div');
-        div.className = 'template-item';
-        div.innerHTML = `
-          <div>
-            <input type="checkbox" data-index="${i}" class="pilih-item">
-            <strong>${t.judul}</strong><br><small>${t.isi}</small>
-          </div>
-          <div class="template-actions">
-            <button class="btn-edit" onclick="editTemplate(${i})">Edit</button>
-            <button class="btn-copy" onclick="salinTemplate(${i})">Salin</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
+                const editBtn = document.createElement("button");
+                editBtn.textContent = "Edit";
+                editBtn.onclick = () => editTemplate(index);
 
-    function simpanTemplate() {
-      const judul = document.getElementById('judul').value.trim();
-      const isi = document.getElementById('isi').value.trim();
-      if (judul && isi) {
-        templates.push({ judul, isi });
-        localStorage.setItem('templates', JSON.stringify(templates));
+                div.appendChild(checkbox);
+                div.appendChild(span);
+                div.appendChild(copyBtn);
+                div.appendChild(editBtn);
+                container.appendChild(div);
+            });
+        }
+
+        function addTemplate() {
+            const input = document.getElementById("templateInput");
+            const text = input.value.trim();
+            if (text) {
+                templates.push(text);
+                saveTemplates();
+                renderTemplates();
+                input.value = "";
+            }
+        }
+
+        function deleteSelected() {
+            const checkboxes = document.querySelectorAll(".template-checkbox");
+            templates = templates.filter((_, i) => !checkboxes[i].checked);
+            saveTemplates();
+            renderTemplates();
+        }
+
+        function selectAll() {
+            const checkboxes = document.querySelectorAll(".template-checkbox");
+            checkboxes.forEach(cb => cb.checked = true);
+        }
+
+        function editTemplate(index) {
+            const newText = prompt("Edit template:", templates[index]);
+            if (newText !== null) {
+                templates[index] = newText;
+                saveTemplates();
+                renderTemplates();
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => alert("Disalin ke clipboard"));
+        }
+
         renderTemplates();
-        document.getElementById('judul').value = '';
-        document.getElementById('isi').value = '';
-      }
-    }
-
-    function editTemplate(index) {
-      const t = templates[index];
-      document.getElementById('judul').value = t.judul;
-      document.getElementById('isi').value = t.isi;
-      templates.splice(index, 1);
-      localStorage.setItem('templates', JSON.stringify(templates));
-      renderTemplates();
-    }
-
-    function salinTemplate(index) {
-      navigator.clipboard.writeText(templates[index].isi).then(() => {
-        alert('Template disalin!');
-      });
-    }
-
-    function hapusTerpilih() {
-      const checkboxList = document.querySelectorAll('.pilih-item:checked');
-      const indexes = Array.from(checkboxList).map(cb => +cb.dataset.index).sort((a, b) => b - a);
-      indexes.forEach(i => templates.splice(i, 1));
-      localStorage.setItem('templates', JSON.stringify(templates));
-      renderTemplates();
-    }
-
-    function togglePilihSemua(checkbox) {
-      document.querySelectorAll('.pilih-item').forEach(cb => cb.checked = checkbox.checked);
-    }
-
-    function cariTemplate() {
-      const query = document.getElementById('search').value.toLowerCase();
-      document.querySelectorAll('.template-item').forEach(item => {
-        const text = item.innerText.toLowerCase();
-        item.style.display = text.includes(query) ? '' : 'none';
-      });
-    }
-
-    renderTemplates();
-  </script>
+    </script>
 </body>
+
 </html>
