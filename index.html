@@ -136,7 +136,13 @@
 
         function deleteSelected() {
             const checkboxes = document.querySelectorAll(".template-checkbox");
-            templates = templates.filter((_, i) => !checkboxes[i].checked);
+            const remainingTemplates = [];
+            checkboxes.forEach((cb, i) => {
+                if (!cb.checked) {
+                    remainingTemplates.push(templates[i]);
+                }
+            });
+            templates = remainingTemplates;
             saveTemplates();
             renderTemplates();
         }
