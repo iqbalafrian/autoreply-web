@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AutoReply Editor</title>
 
   <!-- Tambahan untuk mode fullscreen saat Add to Home Screen -->
@@ -78,7 +78,7 @@
     }
     .button-group {
       display: flex;
-      flex-direction: column;
+      flex-direction: column-reverse;
       gap: 4px;
     }
     .toolbar {
@@ -168,8 +168,8 @@
             setTimeout(() => (copyBtn.textContent = "Salin"), 1500);
           };
 
-          buttonGroup.appendChild(editBtn);
           buttonGroup.appendChild(copyBtn);
+          buttonGroup.appendChild(editBtn);
 
           item.appendChild(checkboxContainer);
           item.appendChild(content);
