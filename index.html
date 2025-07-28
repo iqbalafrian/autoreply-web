@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AutoReply Editor</title>
 
-  <!-- Tambahan untuk mode fullscreen saat Add to Home Screen -->
   <link rel="apple-touch-icon" href="icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -58,6 +57,11 @@
       padding: 4px 8px;
       font-size: 0.875rem;
     }
+    button.send {
+      background-color: #6366f1;
+      margin-top: 10px;
+      width: 100%;
+    }
     .template-item {
       background: var(--card);
       padding: 8px;
@@ -95,6 +99,11 @@
       color: #fff;
       cursor: pointer;
     }
+    #sentCount {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #555;
+    }
     :root {
       --bg: #f9f9f9;
       --text: #000;
@@ -119,11 +128,14 @@
   <label><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /> Pilih Semua</label>
   <div id="templateList"></div>
   <button class="delete" onclick="deleteSelectedTemplates()">Hapus Dipilih</button>
+  <button class="send" onclick="sendToWhatsApp()">Kirim ke WhatsApp</button>
+  <div id="sentCount">Pesan terkirim: 0</div>
 
   <script>
     let templates = JSON.parse(localStorage.getItem("templates")) || [];
     let selectedTemplates = [];
     let dark = false;
+    let sentCount = 0;
 
     function renderTemplates() {
       const search = document.getElementById("search").value.toLowerCase();
@@ -225,6 +237,19 @@
       selectedTemplates = [];
       localStorage.setItem("templates", JSON.stringify(templates));
       renderTemplates();
+    }
+
+    function sendToWhatsApp() {
+      if (selectedTemplates.length === 0) {
+        alert("Pilih minimal satu template dulu.");
+        return;
+      }
+      const template = templates[selectedTemplates[0]];
+      const message = encodeURIComponent(template.content);
+      const url = `https://wa.me/?text=${message}`;
+      window.open(url, '_blank');
+      sentCount++;
+      document.getElementById("sentCount").textContent = `Pesan terkirim: ${sentCount}`;
     }
 
     function toggleDarkMode() {
