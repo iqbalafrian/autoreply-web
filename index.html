@@ -1,247 +1,131 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Autoreply Edittor</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background: #f5f5f5;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      font-size: 1.25rem;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 0.4rem;
-      margin: 0.3rem 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 0.8rem;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
-    button {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-    .reply-item {
-      background: #f0f0f0;
-      padding: 0.5rem;
-      border-radius: 8px;
-      margin-bottom: 0.3rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      font-size: 0.8rem;
-    }
-    .reply-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .reply-item .title {
-      font-weight: bold;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .reply-item .text-preview {
-      color: #666;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .reply-item .actions {
-      display: flex;
-      gap: 0.3rem;
-      margin-top: 0.2rem;
-    }
-    .reply-item button {
-      background: #ef4444;
-      font-size: 0.7rem;
-      padding: 0.3rem 0.5rem;
-    }
-    .bulk-delete {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .bulk-delete button {
-      background-color: #ef4444;
-      font-size: 0.75rem;
-    }
-    input[type="checkbox"] {
-      transform: scale(1.1);
-      margin-right: 0.5rem;
-    }
-    .reply-item input[type="checkbox"] {
-      align-self: flex-start;
-      margin-top: 0.2rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>✏️ AutoReply Editor</h1>
-    <input type="text" id="newReplyTitle" placeholder="Judul template..." />
-    <textarea id="newReply" placeholder="Isi template..."></textarea>
-    <button onclick="addReply()">Simpan Template 🔒</button>
+import React, { useState, useEffect } from "react";
 
-    <h3>📋 Daftar Template:</h3>
-    <div class="bulk-delete">
-      <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"> Pilih Semua</label>
-      <button onclick="deleteSelected()">Hapus yang Dipilih 🗑️</button>
+export default function AutoReplyEditor() {
+  const [templateTitle, setTemplateTitle] = useState("");
+  const [templateContent, setTemplateContent] = useState("");
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplates, setSelectedTemplates] = useState([]);
+
+  useEffect(() => {
+    const storedTemplates = JSON.parse(localStorage.getItem("templates")) || [];
+    setTemplates(storedTemplates);
+  }, []);
+
+  const saveTemplate = () => {
+    if (!templateTitle.trim() || !templateContent.trim()) {
+      alert("Judul dan isi template tidak boleh kosong!");
+      return;
+    }
+
+    const newTemplate = { title: templateTitle, content: templateContent };
+    const updatedTemplates = [...templates, newTemplate];
+    setTemplates(updatedTemplates);
+    localStorage.setItem("templates", JSON.stringify(updatedTemplates));
+    setTemplateTitle("");
+    setTemplateContent("");
+  };
+
+  const deleteSelectedTemplates = () => {
+    const remainingTemplates = templates.filter(
+      (_, index) => !selectedTemplates.includes(index)
+    );
+    setTemplates(remainingTemplates);
+    localStorage.setItem("templates", JSON.stringify(remainingTemplates));
+    setSelectedTemplates([]);
+  };
+
+  const toggleTemplateSelection = (index) => {
+    setSelectedTemplates((prevSelected) =>
+      prevSelected.includes(index)
+        ? prevSelected.filter((i) => i !== index)
+        : [...prevSelected, index]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedTemplates.length === templates.length) {
+      setSelectedTemplates([]);
+    } else {
+      setSelectedTemplates(templates.map((_, index) => index));
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white p-4 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4 flex items-center">
+          <span className="mr-2">✏️</span> AutoReply Editor
+        </h2>
+
+        <input
+          type="text"
+          placeholder="Judul template..."
+          className="w-full border border-gray-300 rounded-md p-2 mb-2 text-sm"
+          value={templateTitle}
+          onChange={(e) => setTemplateTitle(e.target.value)}
+        />
+
+        <textarea
+          placeholder="Isi template..."
+          className="w-full border border-gray-300 rounded-md p-2 mb-2 text-sm"
+          rows={4}
+          value={templateContent}
+          onChange={(e) => setTemplateContent(e.target.value)}
+        ></textarea>
+
+        <button
+          onClick={saveTemplate}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full mb-4"
+        >
+          Simpan Template 🔒
+        </button>
+
+        <h3 className="font-semibold text-sm mb-2">📋 Daftar Template:</h3>
+
+        {templates.length > 0 && (
+          <div className="mb-2">
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={selectedTemplates.length === templates.length}
+                onChange={toggleSelectAll}
+                className="mr-2"
+              />
+              Pilih Semua
+            </label>
+          </div>
+        )}
+
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {templates.map((template, index) => (
+            <div key={index} className="flex items-start space-x-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selectedTemplates.includes(index)}
+                onChange={() => toggleTemplateSelection(index)}
+                className="mt-1"
+              />
+              <div>
+                <div className="font-medium">{template.title}</div>
+                <div className="text-gray-600 text-xs">
+                  {template.content.length > 60
+                    ? template.content.substring(0, 60) + "..."
+                    : template.content}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {templates.length > 0 && (
+          <button
+            onClick={deleteSelectedTemplates}
+            className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm w-full"
+          >
+            Hapus yang Dipilih 🗑️
+          </button>
+        )}
+      </div>
     </div>
-    <div id="replyList"></div>
-  </div>
-
-  <script>
-    const listContainer = document.getElementById("replyList");
-
-    function loadReplies() {
-      const replies = JSON.parse(localStorage.getItem("replies") || "[]");
-      listContainer.innerHTML = "";
-
-      replies.forEach((reply, index) => {
-        const div = document.createElement("div");
-        div.className = "reply-item";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "select-reply";
-        checkbox.dataset.index = index;
-
-        const content = document.createElement("div");
-        content.className = "reply-content";
-
-        const titleSpan = document.createElement("span");
-        titleSpan.className = "title";
-        titleSpan.textContent = reply.title || "(Tanpa Judul)";
-
-        const previewSpan = document.createElement("span");
-        previewSpan.className = "text-preview";
-        previewSpan.textContent = reply.text.length > 60 ? reply.text.substring(0, 60) + '...' : reply.text;
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        const copyBtn = document.createElement("button");
-        copyBtn.textContent = "📋";
-        copyBtn.onclick = () => copyReply(reply.text);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Hapus";
-        deleteBtn.onclick = () => deleteReply(index);
-
-        actions.appendChild(copyBtn);
-        actions.appendChild(deleteBtn);
-
-        content.appendChild(titleSpan);
-        content.appendChild(previewSpan);
-        content.appendChild(actions);
-
-        div.appendChild(checkbox);
-        div.appendChild(content);
-        listContainer.appendChild(div);
-      });
-    }
-
-    function addReply() {
-      const inputTitle = document.getElementById("newReplyTitle");
-      const inputText = document.getElementById("newReply");
-      const title = inputTitle.value.trim();
-      const text = inputText.value.trim();
-
-      if (!text) return alert("Isi teks tidak boleh kosong!");
-
-      const replies = JSON.parse(localStorage.getItem("replies") || "[]");
-      replies.push({ title, text });
-      localStorage.setItem("replies", JSON.stringify(replies));
-      inputTitle.value = "";
-      inputText.value = "";
-      loadReplies();
-    }
-
-    function deleteReply(index) {
-      const replies = JSON.parse(localStorage.getItem("replies") || "[]");
-      replies.splice(index, 1);
-      localStorage.setItem("replies", JSON.stringify(replies));
-      loadReplies();
-    }
-
-    function copyReply(text) {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text)
-          .then(() => alert("Template disalin ke clipboard ✅"))
-          .catch(() => fallbackCopyTextToClipboard(text));
-      } else {
-        fallbackCopyTextToClipboard(text);
-      }
-    }
-
-    function fallbackCopyTextToClipboard(text) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.top = "-1000px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        document.execCommand('copy');
-        alert("Template disalin ke clipboard ✅");
-      } catch (err) {
-        alert("Gagal menyalin template ❌");
-      }
-
-      document.body.removeChild(textArea);
-    }
-
-    function toggleSelectAll(checkbox) {
-      const allCheckboxes = document.querySelectorAll(".select-reply");
-      allCheckboxes.forEach(cb => cb.checked = checkbox.checked);
-    }
-
-    function deleteSelected() {
-      const allCheckboxes = document.querySelectorAll(".select-reply:checked");
-      if (allCheckboxes.length === 0) return alert("Tidak ada yang dipilih!");
-
-      let replies = JSON.parse(localStorage.getItem("replies") || "[]");
-      const indexesToDelete = Array.from(allCheckboxes).map(cb => parseInt(cb.dataset.index));
-
-      replies = replies.filter((_, i) => !indexesToDelete.includes(i));
-      localStorage.setItem("replies", JSON.stringify(replies));
-      loadReplies();
-    }
-
-    loadReplies();
-  </script>
-</body>
-</html>
+  );
+}
