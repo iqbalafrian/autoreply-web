@@ -1,93 +1,192 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoReply Web</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autoreply Editor</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #fefefe;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f5f5f5;
       color: #333;
     }
     h1 {
-      font-size: 22px;
       text-align: center;
-      color: #444;
     }
-    textarea, input[type="text"] {
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    textarea, input {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
       border: 1px solid #ccc;
       border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 16px;
+      font-size: 1rem;
     }
     button {
-      padding: 12px 20px;
-      background: #0f9d58;
+      background-color: #3b82f6;
       color: white;
-      font-size: 16px;
       border: none;
+      padding: 0.75rem 1rem;
       border-radius: 8px;
+      font-size: 1rem;
       cursor: pointer;
-      width: 100%;
     }
-    button:hover {
-      background: #0b8043;
+    .reply-item {
+      background: #f0f0f0;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .template-list {
-      margin-top: 20px;
+    .reply-item button {
+      background: #ef4444;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.6rem;
+      margin-left: 0.5rem;
     }
-    .template-item {
-      padding: 10px;
-      background: #f1f1f1;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-size: 15px;
+    .bulk-delete {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bulk-delete button {
+      background-color: #ef4444;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>✏️ AutoReply Editor</h1>
+    <textarea id="newReply" placeholder="Tulis template baru..."></textarea>
+    <button onclick="addReply()">Simpan Template 🔒</button>
 
-<h1>📲 AutoReply Editor</h1>
+    <h3>📋 Daftar Template:</h3>
+    <div class="bulk-delete">
+      <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"> Pilih Semua</label>
+      <button onclick="deleteSelected()">Hapus yang Dipilih 🗑️</button>
+    </div>
+    <div id="replyList"></div>
+  </div>
 
-<input type="text" id="newTemplate" placeholder="Tulis pesan auto-reply...">
-<button onclick="saveTemplate()">Simpan Template 🔒</button>
+  <script>
+    const listContainer = document.getElementById("replyList");
 
-<div class="template-list" id="templateList"></div>
+    function loadReplies() {
+      const replies = JSON.parse(localStorage.getItem("replies") || "[]");
+      listContainer.innerHTML = "";
 
-<script>
-  // Ambil data dari localStorage
-  function loadTemplates() {
-    const list = document.getElementById('templateList');
-    const data = JSON.parse(localStorage.getItem('autoreplies')) || [];
-    list.innerHTML = '';
-    data.forEach((msg, i) => {
-      const div = document.createElement('div');
-      div.className = 'template-item';
-      div.textContent = msg;
-      list.appendChild(div);
-    });
-  }
+      replies.forEach((reply, index) => {
+        const div = document.createElement("div");
+        div.className = "reply-item";
 
-  // Simpan ke localStorage
-  function saveTemplate() {
-    const input = document.getElementById('newTemplate');
-    const value = input.value.trim();
-    if (value === '') return;
-    const data = JSON.parse(localStorage.getItem('autoreplies')) || [];
-    data.unshift(value); // tambahkan di awal
-    localStorage.setItem('autoreplies', JSON.stringify(data));
-    input.value = '';
-    loadTemplates();
-  }
+        const span = document.createElement("span");
+        span.textContent = reply;
 
-  // Pertama kali load
-  window.onload = loadTemplates;
-</script>
+        const buttons = document.createElement("div");
 
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "📋";
+        copyBtn.onclick = () => copyReply(reply);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Hapus";
+        deleteBtn.onclick = () => deleteReply(index);
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "select-reply";
+        checkbox.dataset.index = index;
+
+        buttons.appendChild(copyBtn);
+        buttons.appendChild(deleteBtn);
+
+        div.prepend(checkbox);
+        div.appendChild(span);
+        div.appendChild(buttons);
+
+        listContainer.appendChild(div);
+      });
+    }
+
+    function addReply() {
+      const input = document.getElementById("newReply");
+      const text = input.value.trim();
+      if (!text) return alert("Isi dulu dong!");
+
+      const replies = JSON.parse(localStorage.getItem("replies") || "[]");
+      replies.push(text);
+      localStorage.setItem("replies", JSON.stringify(replies));
+      input.value = "";
+      loadReplies();
+    }
+
+    function deleteReply(index) {
+      const replies = JSON.parse(localStorage.getItem("replies") || "[]");
+      replies.splice(index, 1);
+      localStorage.setItem("replies", JSON.stringify(replies));
+      loadReplies();
+    }
+
+    function copyReply(text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text)
+          .then(() => alert("Template disalin ke clipboard ✅"))
+          .catch(() => fallbackCopyTextToClipboard(text));
+      } else {
+        fallbackCopyTextToClipboard(text);
+      }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.top = "-1000px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+        alert("Template disalin ke clipboard ✅");
+      } catch (err) {
+        alert("Gagal menyalin template ❌");
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    function toggleSelectAll(checkbox) {
+      const allCheckboxes = document.querySelectorAll(".select-reply");
+      allCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+    }
+
+    function deleteSelected() {
+      const allCheckboxes = document.querySelectorAll(".select-reply:checked");
+      if (allCheckboxes.length === 0) return alert("Tidak ada yang dipilih!");
+
+      let replies = JSON.parse(localStorage.getItem("replies") || "[]");
+      const indexesToDelete = Array.from(allCheckboxes).map(cb => parseInt(cb.dataset.index));
+
+      replies = replies.filter((_, i) => !indexesToDelete.includes(i));
+      localStorage.setItem("replies", JSON.stringify(replies));
+      loadReplies();
+    }
+
+    loadReplies();
+  </script>
 </body>
 </html>
