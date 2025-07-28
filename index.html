@@ -7,8 +7,8 @@ export default function AutoReplyEditor() {
   const [selectedTemplates, setSelectedTemplates] = useState([]);
 
   useEffect(() => {
-    const storedTemplates = JSON.parse(localStorage.getItem("templates")) || [];
-    setTemplates(storedTemplates);
+    const stored = JSON.parse(localStorage.getItem("templates")) || [];
+    setTemplates(stored);
   }, []);
 
   const saveTemplate = () => {
@@ -16,103 +16,108 @@ export default function AutoReplyEditor() {
       alert("Judul dan isi template tidak boleh kosong!");
       return;
     }
+
     const newTemplate = { title: templateTitle, content: templateContent };
-    const updatedTemplates = [...templates, newTemplate];
-    setTemplates(updatedTemplates);
-    localStorage.setItem("templates", JSON.stringify(updatedTemplates));
+    const updated = [...templates, newTemplate];
+    setTemplates(updated);
+    localStorage.setItem("templates", JSON.stringify(updated));
     setTemplateTitle("");
     setTemplateContent("");
   };
 
   const deleteSelectedTemplates = () => {
-    const remainingTemplates = templates.filter((_, index) => !selectedTemplates.includes(index));
-    setTemplates(remainingTemplates);
-    localStorage.setItem("templates", JSON.stringify(remainingTemplates));
+    const filtered = templates.filter((_, i) => !selectedTemplates.includes(i));
+    setTemplates(filtered);
+    localStorage.setItem("templates", JSON.stringify(filtered));
     setSelectedTemplates([]);
   };
 
-  const toggleTemplateSelection = (index) => {
-    setSelectedTemplates((prevSelected) =>
-      prevSelected.includes(index) ? prevSelected.filter((i) => i !== index) : [...prevSelected, index]
+  const toggleSelect = (index) => {
+    setSelectedTemplates((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
     );
   };
 
   const toggleSelectAll = () => {
-    if (selectedTemplates.length === templates.length) {
-      setSelectedTemplates([]);
-    } else {
-      setSelectedTemplates(templates.map((_, index) => index));
-    }
+    setSelectedTemplates(
+      selectedTemplates.length === templates.length
+        ? []
+        : templates.map((_, i) => i)
+    );
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🖊️ AutoReply Editor</h1>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-lg p-4 w-full max-w-md">
+        <h2 className="text-lg font-bold mb-3">✏️ AutoReply Editor</h2>
 
-      <div className="mb-4">
         <input
           type="text"
+          placeholder="Judul Template"
+          className="border px-2 py-1 rounded w-full mb-2 text-sm"
           value={templateTitle}
           onChange={(e) => setTemplateTitle(e.target.value)}
-          placeholder="Judul Template"
-          className="border px-2 py-1 rounded w-full mb-2"
         />
+
         <textarea
+          placeholder="Isi Template"
+          className="border px-2 py-1 rounded w-full mb-3 text-sm"
+          rows={4}
           value={templateContent}
           onChange={(e) => setTemplateContent(e.target.value)}
-          placeholder="Isi Template"
-          className="border px-2 py-1 rounded w-full"
-          rows={3}
         />
-        <button onClick={saveTemplate} className="mt-2 bg-blue-600 text-white px-4 py-1 rounded">
-          Simpan Template 🔒
+
+        <button
+          onClick={saveTemplate}
+          className="bg-blue-500 hover:bg-blue-600 text-white w-full py-2 rounded text-sm mb-4"
+        >
+          Simpan Template
         </button>
-      </div>
 
-      <h2 className="text-lg font-semibold mb-2">📂 Daftar Template:</h2>
+        {templates.length > 0 && (
+          <>
+            <div className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={selectedTemplates.length === templates.length}
+                onChange={toggleSelectAll}
+                className="mr-2"
+              />
+              <span className="text-sm">Pilih Semua</span>
+            </div>
 
-      {templates.length > 0 && (
-        <>
-          <label className="flex items-center mb-2">
-            <input type="checkbox" onChange={toggleSelectAll} checked={selectedTemplates.length === templates.length} className="mr-2" />
-            Pilih Semua
-          </label>
-
-          <ul className="space-y-2">
-            {templates.map((template, index) => (
-              <li key={index} className="border rounded px-3 py-2 flex items-start justify-between">
-                <label className="flex items-start">
+            <div className="space-y-2 max-h-64 overflow-y-auto mb-3">
+              {templates.map((tpl, index) => (
+                <div key={index} className="flex items-start space-x-2 text-sm">
                   <input
                     type="checkbox"
                     checked={selectedTemplates.includes(index)}
-                    onChange={() => toggleTemplateSelection(index)}
-                    className="mr-2 mt-1"
+                    onChange={() => toggleSelect(index)}
+                    className="mt-1"
                   />
                   <div>
-                    <div className="font-semibold">{template.title}</div>
-                    <div className="text-sm text-gray-700">
-                      {template.content.length > 60
-                        ? template.content.substring(0, 60) + "..."
-                        : template.content}
+                    <div className="font-medium">{tpl.title}</div>
+                    <div className="text-xs text-gray-600">
+                      {tpl.content.length > 60
+                        ? tpl.content.substring(0, 60) + "..."
+                        : tpl.content}
                     </div>
                   </div>
-                </label>
-              </li>
-            ))}
-          </ul>
+                </div>
+              ))}
+            </div>
 
-          {selectedTemplates.length > 0 && (
             <button
               onClick={deleteSelectedTemplates}
-              className="mt-4 bg-red-600 text-white px-4 py-1 rounded"
+              className="bg-red-500 hover:bg-red-600 text-white w-full py-2 rounded text-sm"
             >
-              🗑️ Hapus yang Dipilih
+              Hapus yang Dipilih
             </button>
-          )}
-        </>
-      )}
-
-      {templates.length === 0 && <p className="text-gray-500">Belum ada template yang tersimpan.</p>}
+          </>
+        )}
+      </div>
     </div>
   );
 }
