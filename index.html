@@ -1,89 +1,113 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta charset="UTF-8">
-  <title>AutoReply Templat</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AutoReply Template</title>
   <style>
     body {
       font-family: sans-serif;
-      margin: 1rem;
+      padding: 1rem;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    :root {
+      --bg: #fff;
+      --text: #000;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111;
+        --text: #fff;
+      }
     }
     .template {
-      margin: 1rem 0;
-      padding: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 8px;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      background: #f4f4f4;
     }
-    .actions {
-      margin-top: 0.5rem;
+    .template-title {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    .template-content {
+      white-space: pre-wrap;
     }
     .actions button {
       margin-right: 0.5rem;
     }
-    .highlight {
-      background-color: #d4edda;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      display: inline-block;
+    input, textarea {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
+  <h2>📋 Daftar Templat</h2>
+  <input type="text" id="searchBox" placeholder="🔍 Cari templat..." oninput="loadTemplates()"><br><br>
 
-  <h2>Daftar Templat</h2>
   <div id="templateList"></div>
 
-  <h3>Tambah Templat</h3>
-  <input type="text" id="templateTitle" placeholder="Judul"><br><br>
-  <textarea id="templateContent" rows="4" placeholder="Isi templat"></textarea><br><br>
-  <button onclick="addTemplate()">Tambah</button>
+  <h3>➕ Tambah Templat</h3>
+  <input type="text" id="templateTitle" placeholder="Judul">
+  <textarea id="templateContent" rows="3" placeholder="Isi templat"></textarea>
+  <button onclick="addTemplate()">Simpan</button>
 
   <script>
+    const titleInput = document.getElementById('templateTitle');
+    const contentInput = document.getElementById('templateContent');
+    const searchBox = document.getElementById('searchBox');
     const templateList = document.getElementById('templateList');
 
     function loadTemplates() {
+      const keyword = searchBox.value.toLowerCase();
       const templates = JSON.parse(localStorage.getItem('templates')) || [];
       templateList.innerHTML = '';
       templates.forEach((tpl, i) => {
-        const div = document.createElement('div');
-        div.className = 'template';
-        div.innerHTML = `
-          <strong>${tpl.title}</strong><br>
-          <div>${tpl.content}</div>
-          <div class="actions">
-            <button onclick="copyTemplate(${i})">Salin</button>
-            <button onclick="editTemplate(${i})">Edit</button>
-            <button onclick="deleteTemplate(${i})">Hapus</button>
-          </div>
-        `;
-        templateList.appendChild(div);
+        if (tpl.title.toLowerCase().includes(keyword) || tpl.content.toLowerCase().includes(keyword)) {
+          const div = document.createElement('div');
+          div.className = 'template';
+          div.innerHTML = `
+            <div class="template-title">${tpl.title}</div>
+            <div class="template-content">${tpl.content}</div>
+            <div class="actions">
+              <button onclick="copyTemplate(${i})">📋 Salin</button>
+              <button onclick="editTemplate(${i})">✏️ Edit</button>
+              <button onclick="deleteTemplate(${i})">🗑️ Hapus</button>
+            </div>
+          `;
+          templateList.appendChild(div);
+        }
       });
     }
 
     function addTemplate() {
-      const title = document.getElementById('templateTitle').value.trim();
-      const content = document.getElementById('templateContent').value.trim();
-      if (!title || !content) return alert('Isi judul dan konten');
-
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      if (!title || !content) return alert("Isi judul dan konten!");
       const templates = JSON.parse(localStorage.getItem('templates')) || [];
       templates.push({ title, content });
       localStorage.setItem('templates', JSON.stringify(templates));
-      document.getElementById('templateTitle').value = '';
-      document.getElementById('templateContent').value = '';
+      titleInput.value = '';
+      contentInput.value = '';
       loadTemplates();
     }
 
     function copyTemplate(i) {
       const templates = JSON.parse(localStorage.getItem('templates')) || [];
-      const content = templates[i].content;
-      navigator.clipboard.writeText(content).then(() => alert('Tersalin'));
+      navigator.clipboard.writeText(templates[i].content).then(() => alert("✅ Teks disalin!"));
     }
 
     function editTemplate(i) {
       const templates = JSON.parse(localStorage.getItem('templates')) || [];
-      const newTitle = prompt('Edit judul:', templates[i].title);
-      const newContent = prompt('Edit isi:', templates[i].content);
+      const newTitle = prompt("Edit judul:", templates[i].title);
+      const newContent = prompt("Edit konten:", templates[i].content);
       if (newTitle && newContent) {
         templates[i] = { title: newTitle, content: newContent };
         localStorage.setItem('templates', JSON.stringify(templates));
@@ -92,7 +116,7 @@
     }
 
     function deleteTemplate(i) {
-      if (!confirm('Hapus templat ini?')) return;
+      if (!confirm("Yakin ingin menghapus templat ini?")) return;
       const templates = JSON.parse(localStorage.getItem('templates')) || [];
       templates.splice(i, 1);
       localStorage.setItem('templates', JSON.stringify(templates));
