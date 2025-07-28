@@ -71,13 +71,20 @@
             flex: 1;
             margin-right: 0.5rem;
         }
+
+        .template input[type="text"],
+        .template textarea {
+            margin-top: 0.5rem;
+            width: 100%;
+            font-size: 1rem;
+        }
     </style>
 </head>
 
 <body>
     <header>AutoReply</header>
     <main>
-        <input type="text" id="titleInput" placeholder="Masukkan judul/kata kunci...">
+        <input type="text" id="titleInput" placeholder="Masukkan judul...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
         <button class="primary" onclick="addTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
@@ -104,22 +111,29 @@
                 checkbox.type = "checkbox";
                 checkbox.className = "template-checkbox";
 
-                const span = document.createElement("span");
-                span.className = "template-content";
-                span.textContent = `${item.title} → ${item.text}`;
+                const contentDiv = document.createElement("div");
+                contentDiv.className = "template-content";
+
+                const titleInput = document.createElement("input");
+                titleInput.type = "text";
+                titleInput.value = item.title;
+                titleInput.oninput = (e) => updateTemplate(index, e.target.value, null);
+
+                const textArea = document.createElement("textarea");
+                textArea.rows = 2;
+                textArea.value = item.text;
+                textArea.oninput = (e) => updateTemplate(index, null, e.target.value);
+
+                contentDiv.appendChild(titleInput);
+                contentDiv.appendChild(textArea);
 
                 const copyBtn = document.createElement("button");
                 copyBtn.textContent = "Salin";
                 copyBtn.onclick = () => copyToClipboard(item.text);
 
-                const editBtn = document.createElement("button");
-                editBtn.textContent = "Edit";
-                editBtn.onclick = () => editTemplate(index);
-
                 div.appendChild(checkbox);
-                div.appendChild(span);
+                div.appendChild(contentDiv);
                 div.appendChild(copyBtn);
-                div.appendChild(editBtn);
                 container.appendChild(div);
             });
         }
@@ -156,15 +170,10 @@
             checkboxes.forEach(cb => cb.checked = true);
         }
 
-        function editTemplate(index) {
-            const current = templates[index];
-            const newTitle = prompt("Edit judul:", current.title);
-            const newText = prompt("Edit isi template:", current.text);
-            if (newTitle !== null && newText !== null) {
-                templates[index] = { title: newTitle, text: newText };
-                saveTemplates();
-                renderTemplates();
-            }
+        function updateTemplate(index, newTitle, newText) {
+            if (newTitle !== null) templates[index].title = newTitle;
+            if (newText !== null) templates[index].text = newText;
+            saveTemplates();
         }
 
         function copyToClipboard(text) {
