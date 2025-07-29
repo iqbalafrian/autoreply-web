@@ -1,115 +1,171 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoReply</title>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 20px; background: #f0f4ff; color: #003366; }
-    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .icon-btn {
-      width: 40px; height: 40px; background: #e0e7ff; border-radius: 50%; border: none;
-      display: flex; justify-content: center; align-items: center; cursor: pointer;
-      transition: background 0.3s; font-size: 20px;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f4ff;
+      color: #333;
     }
-    .icon-btn:hover { background: #c7d2fe; }
-    #searchInput { display: none; margin-left: 10px; width: auto; padding: 8px; border-radius: 8px; }
-    h1 { text-align: center; margin: 0; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    .template { margin-top: 10px; padding: 10px; background: #e9f0ff; border-radius: 8px; }
-    .flex { display: flex; gap: 10px; flex-wrap: wrap; }
-    input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #007bff; color: white; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
 
-    /* Dark mode */
-    body.dark { background: #1a1a1a; color: #f0f0f0; }
-    body.dark .card { background: #2c2c2c; }
-    body.dark .template { background: #333; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #4a90e2;
+      color: white;
+      padding: 10px 20px;
+    }
+
+    .search-icon,
+    .darkmode-icon {
+      cursor: pointer;
+      background-color: white;
+      color: #4a90e2;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 10px;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+    }
+
+    #searchInput {
+      display: none;
+      margin-left: 10px;
+      padding: 6px;
+    }
+
+    .template {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px;
+      background: #e9f0ff;
+      border-radius: 8px;
+      margin: 10px;
+      max-width: 100%;
+    }
+
+    .template-content {
+      flex: 1;
+    }
+
+    .template-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-left: 10px;
+    }
+
+    .template-buttons button {
+      padding: 4px 8px;
+      font-size: 0.85rem;
+      border: none;
+      background: #4a90e2;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .template-buttons button:hover {
+      background: #357ab8;
+    }
   </style>
 </head>
+
 <body>
-  <div class="toolbar">
-    <div>
-      <button class="icon-btn" onclick="toggleSearch()" title="Cari">
-        🔍
-      </button>
-      <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
+  <header>
+    <div class="search-container">
+      <div class="search-icon" onclick="toggleSearch()">🔍</div>
+      <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()">
     </div>
-    <h1>AutoReply</h1>
-    <button class="icon-btn" onclick="toggleDarkMode()" title="Mode Gelap">
-      🌙
-    </button>
-  </div>
+    <h1 style="margin: 0; text-align: center; flex: 1;">AutoReply</h1>
+    <div class="darkmode-icon" onclick="toggleDarkMode()">🌙</div>
+  </header>
 
-  <div class="card">
-    <label>Judul Template</label>
-    <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
-    <label>Isi Template</label>
-    <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
-    <button onclick="simpanTemplate()">Simpan Template</button>
-  </div>
-
-  <div class="card">
-    <h2>Daftar Template</h2>
+  <main style="padding: 20px">
     <div id="daftarTemplate"></div>
-  </div>
+  </main>
 
   <script>
-    let templates = [];
-    try {
-      templates = JSON.parse(localStorage.getItem("templates"))?.filter(t=>t.judul && t.isi) || [];
-    } catch { localStorage.removeItem("templates"); }
-
-    function simpanTemplate() {
-      const judul = document.getElementById('judul').value.trim();
-      const isi = document.getElementById('isi').value.trim();
-      if (!judul || !isi) return alert('Judul dan isi harus diisi.');
-      templates.push({ judul, isi });
-      localStorage.setItem('templates', JSON.stringify(templates));
-      document.getElementById('judul').value = '';
-      document.getElementById('isi').value = '';
-      tampilkanTemplate();
-    }
-
-    function hapusTemplate(i) {
-      if (confirm('Yakin ingin menghapus template ini?')) {
-        templates.splice(i,1);
-        localStorage.setItem('templates', JSON.stringify(templates));
-        tampilkanTemplate();
-      }
-    }
-
-    function salinTemplate(isi) {
-      navigator.clipboard.writeText(isi).then(() => alert('Template berhasil disalin!'));
-    }
-
-    function tampilkanTemplate() {
-      const kw = document.getElementById('searchInput').value?.toLowerCase() || '';
-      const c = document.getElementById('daftarTemplate');
-      c.innerHTML = '';
-      if (!templates.length) return c.innerHTML = '<p>Tidak ada template tersimpan.</p>';
-      templates.forEach((t,i) => {
-        if (t.judul.toLowerCase().includes(kw) || t.isi.toLowerCase().includes(kw)) {
-          const d = document.createElement('div');
-          d.className = 'template';
-          d.innerHTML = `<strong>${t.judul}</strong><p>${t.isi}</p><div class="flex"><button onclick="salinTemplate(\`${t.isi.replace(/`/g,'\\`')}\`)">Salin</button><button onclick="hapusTemplate(${i})">Hapus</button></div>`;
-          c.appendChild(d);
-        }
-      });
-    }
+    let templates = [
+      { judul: 'Salam', isi: 'Halo! Ada yang bisa saya bantu?' },
+      { judul: 'Terima Kasih', isi: 'Terima kasih telah menghubungi kami!' }
+    ];
 
     function toggleSearch() {
-      const si = document.getElementById('searchInput');
-      si.style.display = si.style.display === 'inline-block' ? 'none' : 'inline-block';
-      if (si.style.display === 'inline-block') si.focus();
+      const input = document.getElementById('searchInput');
+      input.style.display = input.style.display === 'none' ? 'block' : 'none';
+      if (input.style.display === 'block') input.focus();
     }
 
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
     }
 
+    function salinTemplate(teks) {
+      navigator.clipboard.writeText(teks).then(() => alert('Template disalin!'));
+    }
+
+    function hapusTemplate(i) {
+      if (confirm('Hapus template ini?')) {
+        templates.splice(i, 1);
+        tampilkanTemplate();
+      }
+    }
+
+    function tampilkanTemplate() {
+      const kw = (document.getElementById('searchInput')?.value || "").toLowerCase();
+      const list = document.getElementById('daftarTemplate');
+      list.innerHTML = '';
+
+      if (!templates.length) {
+        list.innerHTML = '<p>Tidak ada template tersimpan.</p>';
+        return;
+      }
+
+      templates.forEach((t, i) => {
+        if (t.judul.toLowerCase().includes(kw) || t.isi.toLowerCase().includes(kw)) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'template';
+
+          const content = document.createElement('div');
+          content.className = 'template-content';
+          content.innerHTML = `<strong>${t.judul}</strong><p>${t.isi}</p>`;
+
+          const btns = document.createElement('div');
+          btns.className = 'template-buttons';
+
+          const copyBtn = document.createElement('button');
+          copyBtn.textContent = 'Salin';
+          copyBtn.onclick = () => salinTemplate(t.isi);
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Hapus';
+          delBtn.onclick = () => hapusTemplate(i);
+
+          btns.append(copyBtn, delBtn);
+          wrapper.append(content, btns);
+          list.appendChild(wrapper);
+        }
+      });
+    }
+
     tampilkanTemplate();
   </script>
 </body>
+
 </html>
