@@ -5,39 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AutoReplyEditor</title>
   <style>
+    :root {
+      --bg-light: #f0f4ff;
+      --text-light: #003366;
+      --bg-dark: #1e1e1e;
+      --text-dark: #ffffff;
+    }
+
     body {
       font-family: sans-serif;
-      background-color: #f0f4ff;
-      color: #003366;
+      margin: 0;
       padding: 20px;
+      background-color: var(--bg-light);
+      color: var(--text-light);
       transition: background 0.3s, color 0.3s;
     }
 
     body.dark {
-      background-color: #1a1a1a;
-      color: #eee;
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
     }
 
-    input, textarea, select, button {
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      background-color: rgba(0,0,0,0.05);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .icon-button:hover {
+      background-color: rgba(0,0,0,0.1);
+    }
+
+    .icon-button svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    #searchBar {
+      display: none;
+      margin-top: 10px;
+    }
+
+    input, textarea, button {
+      width: 100%;
       padding: 10px;
       margin: 5px 0;
       border-radius: 8px;
       border: 1px solid #ccc;
-      width: 100%;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    body.dark input, body.dark textarea {
-      background-color: #333;
-      color: #eee;
-      border-color: #555;
     }
 
     button {
       background-color: #007bff;
       color: white;
-      cursor: pointer;
       border: none;
+      cursor: pointer;
     }
 
     button:hover {
@@ -50,12 +85,10 @@
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: background 0.3s;
     }
 
     body.dark .card {
-      background-color: #2b2b2b;
-      box-shadow: none;
+      background-color: #2c2c2c;
     }
 
     .template {
@@ -66,7 +99,7 @@
     }
 
     body.dark .template {
-      background-color: #3a3a3a;
+      background-color: #333;
     }
 
     .flex {
@@ -74,50 +107,19 @@
       gap: 10px;
       flex-wrap: wrap;
     }
-
-    /* Top Bar */
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .icon-btn {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: inherit;
-      padding: 10px;
-    }
-
-    #searchContainer {
-      display: none;
-      margin-top: 10px;
-      max-width: 300px;
-      width: 100%;
-    }
-
-    @media (max-width: 600px) {
-      .top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      #searchContainer {
-        width: 100%;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button class="icon-btn" onclick="toggleSearch()">👤</button>
-    <button class="icon-btn" onclick="toggleDarkMode()">🌓</button>
+  <div class="toolbar">
+    <div class="icon-button" onclick="toggleSearchBar()" title="Cari Template">
+      🔍
+    </div>
+    <div class="icon-button" onclick="toggleDarkMode()" title="Mode Gelap">
+      🌙
+    </div>
   </div>
 
-  <div id="searchContainer">
+  <div id="searchBar">
     <input type="text" id="cari" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
   </div>
 
@@ -126,10 +128,8 @@
   <div class="card">
     <label>Judul Template</label>
     <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
-
     <label>Isi Template</label>
     <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
-
     <button onclick="simpanTemplate()">Simpan Template</button>
   </div>
 
@@ -146,7 +146,7 @@
       if (Array.isArray(stored)) {
         templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
       }
-    } catch (e) {
+    } catch {
       localStorage.removeItem("templates");
     }
 
@@ -208,13 +208,9 @@
         });
     }
 
-    function toggleSearch() {
-      const searchContainer = document.getElementById("searchContainer");
-      if (searchContainer.style.display === "none" || searchContainer.style.display === "") {
-        searchContainer.style.display = "block";
-      } else {
-        searchContainer.style.display = "none";
-      }
+    function toggleSearchBar() {
+      const bar = document.getElementById("searchBar");
+      bar.style.display = bar.style.display === "block" ? "none" : "block";
     }
 
     function toggleDarkMode() {
