@@ -10,47 +10,61 @@
       background-color: #f0f4ff;
       color: #003366;
       padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
     }
+
     input, textarea, select, button {
       padding: 10px;
       margin: 5px 0;
       border-radius: 8px;
       border: 1px solid #ccc;
       width: 100%;
+      background-color: white;
+      color: #003366;
+      transition: background-color 0.3s, color 0.3s;
     }
+
     button {
       background-color: #007bff;
       color: white;
       cursor: pointer;
       border: none;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
     .card {
       background: white;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: background-color 0.3s, color 0.3s;
     }
+
     .template {
       margin-top: 10px;
       padding: 10px;
       background: #e9f0ff;
       border-radius: 8px;
+      transition: background-color 0.3s, color 0.3s;
     }
+
     .flex {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
+
     .icon-button {
       background-color: #e0e7ff;
       border: none;
@@ -59,16 +73,47 @@
       cursor: pointer;
       font-size: 18px;
     }
+
     .icon-button:hover {
       background-color: #c7d2fe;
     }
+
     #searchInput {
       display: none;
       margin-left: 10px;
       width: auto;
     }
+
     svg {
       vertical-align: middle;
+    }
+
+    /* Mode gelap aktif */
+    body[data-theme="dark"] {
+      background-color: #1a1a1a;
+      color: #f0f4ff;
+    }
+
+    body[data-theme="dark"] .card {
+      background-color: #2a2a2a;
+      color: #f0f4ff;
+    }
+
+    body[data-theme="dark"] input,
+    body[data-theme="dark"] textarea,
+    body[data-theme="dark"] select {
+      background-color: #333;
+      color: #f0f4ff;
+      border-color: #555;
+    }
+
+    body[data-theme="dark"] .template {
+      background-color: #3a3a3a;
+      color: #f0f4ff;
+    }
+
+    body[data-theme="dark"] .icon-button svg {
+      fill: #f0f4ff;
     }
   </style>
 </head>
@@ -76,13 +121,13 @@
   <div class="toolbar">
     <div>
       <button class="icon-button" onclick="toggleSearch()" title="Cari">
-        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="#003366" viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.293 14.707l4.5 4.5 1.414-1.414-4.5-4.5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/></svg>
+        🏸
       </button>
       <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
     </div>
     <h1 style="margin: 0;">AutoReply</h1>
     <button class="icon-button" onclick="toggleDarkMode()" title="Mode Gelap">
-      <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="#003366" viewBox="0 0 24 24"><path d="M21.64 13.58A9 9 0 1110.42 2.36a7 7 0 1011.22 11.22z"/></svg>
+      🌓
     </button>
   </div>
 
@@ -144,7 +189,8 @@
     }
 
     function tampilkanTemplate() {
-      const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
+      const keywordInput = document.getElementById("searchInput");
+      const keyword = (keywordInput.value || "").toLowerCase();
       const container = document.getElementById("daftarTemplate");
       container.innerHTML = "";
 
@@ -155,7 +201,10 @@
 
       templates
         .map((t, i) => ({ ...t, index: i }))
-        .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)))
+        .filter(t =>
+          (t.judul && t.judul.toLowerCase().includes(keyword)) ||
+          (t.isi && t.isi.toLowerCase().includes(keyword))
+        )
         .forEach(t => {
           const div = document.createElement("div");
           div.className = "template";
@@ -181,15 +230,7 @@
 
     function toggleDarkMode() {
       const isDark = document.body.dataset.theme === "dark";
-      if (isDark) {
-        document.body.dataset.theme = "light";
-        document.body.style.backgroundColor = "#f0f4ff";
-        document.body.style.color = "#003366";
-      } else {
-        document.body.dataset.theme = "dark";
-        document.body.style.backgroundColor = "#1a1a1a";
-        document.body.style.color = "#f0f4ff";
-      }
+      document.body.dataset.theme = isDark ? "light" : "dark";
     }
 
     tampilkanTemplate();
