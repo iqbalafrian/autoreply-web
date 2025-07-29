@@ -26,12 +26,13 @@
             padding: 1rem;
             font-size: 1.5rem;
             position: relative;
+            text-align: center;
         }
 
         .toggle-mode {
             position: absolute;
             top: 50%;
-            right: 3rem;
+            right: 1rem;
             transform: translateY(-50%);
             background: none;
             border: none;
@@ -117,10 +118,10 @@
 
 <body>
     <header>
-        AutoReply
         <button class="search-btn" onclick="toggleSearch()">
             <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Cari">
         </button>
+        AutoReply
         <button class="toggle-mode" onclick="toggleDarkMode()">
             <img src="https://cdn-icons-png.flaticon.com/512/169/169367.png" alt="Mode Gelap">
         </button>
@@ -152,7 +153,7 @@
             const others = templates.filter(t => !t.pinned);
             const all = [...pinned, ...others];
 
-            all.forEach((item, index) => {
+            all.forEach((item, realIndex) => {
                 if (!item.title.toLowerCase().includes(keyword) && !item.text.toLowerCase().includes(keyword)) return;
                 const div = document.createElement("div");
                 div.className = "template" + (item.pinned ? " pinned" : "");
@@ -167,7 +168,7 @@
 
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Edit";
-                editBtn.onclick = () => editTemplate(index);
+                editBtn.onclick = () => editTemplate(realIndex);
 
                 const copyBtn = document.createElement("button");
                 copyBtn.textContent = "Salin";
@@ -175,7 +176,7 @@
 
                 const pinBtn = document.createElement("button");
                 pinBtn.textContent = item.pinned ? "Unpin" : "Pin";
-                pinBtn.onclick = () => togglePin(index);
+                pinBtn.onclick = () => togglePin(item.title);
 
                 div.appendChild(checkbox);
                 div.appendChild(contentDiv);
@@ -249,8 +250,8 @@
             document.body.classList.toggle("dark-mode");
         }
 
-        function togglePin(index) {
-            templates[index].pinned = !templates[index].pinned;
+        function togglePin(title) {
+            templates = templates.map(t => t.title === title ? { ...t, pinned: !t.pinned } : t);
             saveTemplates();
             renderTemplates();
         }
