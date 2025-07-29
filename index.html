@@ -26,6 +26,22 @@
             padding: 1rem;
             text-align: center;
             font-size: 1.5rem;
+            position: relative;
+        }
+
+        .toggle-mode {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .toggle-mode img {
+            width: 24px;
+            height: 24px;
         }
 
         main {
@@ -81,25 +97,23 @@
             flex: 1;
             margin-right: 0.5rem;
         }
-
-        .template-count {
-            font-weight: bold;
-            margin-top: 1rem;
-        }
     </style>
 </head>
 
 <body>
-    <header>AutoReply</header>
+    <header>
+        AutoReply
+        <button class="toggle-mode" onclick="toggleDarkMode()">
+            <img src="https://cdn-icons-png.flaticon.com/512/169/169367.png" alt="Mode Gelap">
+        </button>
+    </header>
     <main>
         <input type="text" id="titleInput" placeholder="Masukkan judul...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
         <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
-        <button onclick="toggleDarkMode()">Ganti Mode</button>
 
-        <div class="template-count" id="templateCount"></div>
         <div id="templates"></div>
     </main>
 
@@ -109,11 +123,6 @@
 
         function saveTemplates() {
             localStorage.setItem("templates", JSON.stringify(templates));
-        }
-
-        function updateTemplateCount() {
-            const countDiv = document.getElementById("templateCount");
-            countDiv.textContent = `Total Template: ${templates.length}`;
         }
 
         function renderTemplates() {
@@ -145,7 +154,6 @@
                 div.appendChild(copyBtn);
                 container.appendChild(div);
             });
-            updateTemplateCount();
         }
 
         function addOrUpdateTemplate() {
