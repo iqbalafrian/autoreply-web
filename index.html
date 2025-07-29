@@ -130,7 +130,13 @@
         <input type="text" id="searchInput" placeholder="Cari template..." oninput="renderTemplates()" style="display:none">
         <input type="text" id="titleInput" placeholder="Masukkan judul...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
-        <input type="text" id="categoryInput" placeholder="Tambahkan kategori...">
+
+        <select id="categoryInput">
+        </select>
+
+        <input type="text" id="newCategoryInput" placeholder="Tambahkan kategori baru...">
+        <button onclick="addCategory()">Tambah Kategori</button>
+
         <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
@@ -139,10 +145,37 @@
 
     <script>
         let templates = JSON.parse(localStorage.getItem("templates") || "[]");
+        let categories = JSON.parse(localStorage.getItem("categories") || "[]");
         let editingIndex = -1;
 
         function saveTemplates() {
             localStorage.setItem("templates", JSON.stringify(templates));
+        }
+
+        function saveCategories() {
+            localStorage.setItem("categories", JSON.stringify(categories));
+        }
+
+        function renderCategories() {
+            const categoryInput = document.getElementById("categoryInput");
+            categoryInput.innerHTML = "<option value=''>- Pilih Kategori -</option>";
+            categories.forEach(cat => {
+                const option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                categoryInput.appendChild(option);
+            });
+        }
+
+        function addCategory() {
+            const newCatInput = document.getElementById("newCategoryInput");
+            const newCat = newCatInput.value.trim();
+            if (newCat && !categories.includes(newCat)) {
+                categories.push(newCat);
+                saveCategories();
+                renderCategories();
+                newCatInput.value = "";
+            }
         }
 
         function renderTemplates() {
@@ -193,8 +226,14 @@
             const categoryInput = document.getElementById("categoryInput");
             const title = titleInput.value.trim();
             const text = templateInput.value.trim();
-            const category = categoryInput.value.trim();
+            const category = categoryInput.value;
             if (!title || !text) return;
+
+            if (!categories.includes(category) && category) {
+                categories.push(category);
+                saveCategories();
+                renderCategories();
+            }
 
             if (editingIndex === -1) {
                 if (templates.some(t => t.title === title)) {
@@ -262,6 +301,7 @@
             if (searchInput.style.display === "block") searchInput.focus();
         }
 
+        renderCategories();
         renderTemplates();
     </script>
 </body>
