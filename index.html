@@ -5,134 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AutoReply</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f0f4ff;
-      color: #003366;
-      padding: 20px;
+    body { font-family: sans-serif; margin: 0; padding: 20px; background: #f0f4ff; color: #003366; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .icon-btn {
+      width: 40px; height: 40px; background: #e0e7ff; border-radius: 50%; border: none;
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+      transition: background 0.3s; font-size: 20px;
     }
-    input, textarea, select, button {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 100%;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      border: none;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .template {
-      margin-top: 10px;
-      padding: 10px;
-      background: #e9f0ff;
-      border-radius: 8px;
-    }
-    .flex {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .icon-btn:hover { background: #c7d2fe; }
+    #searchInput { display: none; margin-left: 10px; width: auto; padding: 8px; border-radius: 8px; }
+    h1 { text-align: center; margin: 0; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .template { margin-top: 10px; padding: 10px; background: #e9f0ff; border-radius: 8px; }
+    .flex { display: flex; gap: 10px; flex-wrap: wrap; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+
+    /* Dark mode */
+    body.dark { background: #1a1a1a; color: #f0f0f0; }
+    body.dark .card { background: #2c2c2c; }
+    body.dark .template { background: #333; }
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">AutoReply</h1>
+  <div class="toolbar">
+    <div>
+      <button class="icon-btn" onclick="toggleSearch()" title="Cari">
+        🔍
+      </button>
+      <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
+    </div>
+    <h1>AutoReply</h1>
+    <button class="icon-btn" onclick="toggleDarkMode()" title="Mode Gelap">
+      🌙
+    </button>
+  </div>
+
   <div class="card">
     <label>Judul Template</label>
     <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
-
     <label>Isi Template</label>
     <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
-
     <button onclick="simpanTemplate()">Simpan Template</button>
   </div>
 
   <div class="card">
     <h2>Daftar Template</h2>
-    <input type="text" id="cari" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
     <div id="daftarTemplate"></div>
   </div>
 
   <script>
     let templates = [];
-
     try {
-      const stored = JSON.parse(localStorage.getItem("templates"));
-      if (Array.isArray(stored)) {
-        templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
-      }
-    } catch (e) {
-      localStorage.removeItem("templates");
-    }
+      templates = JSON.parse(localStorage.getItem("templates"))?.filter(t=>t.judul && t.isi) || [];
+    } catch { localStorage.removeItem("templates"); }
 
     function simpanTemplate() {
-      const judul = document.getElementById("judul").value.trim();
-      const isi = document.getElementById("isi").value.trim();
-
-      if (!judul || !isi) {
-        alert("Judul dan isi harus diisi.");
-        return;
-      }
-
+      const judul = document.getElementById('judul').value.trim();
+      const isi = document.getElementById('isi').value.trim();
+      if (!judul || !isi) return alert('Judul dan isi harus diisi.');
       templates.push({ judul, isi });
-      localStorage.setItem("templates", JSON.stringify(templates));
-      document.getElementById("judul").value = "";
-      document.getElementById("isi").value = "";
+      localStorage.setItem('templates', JSON.stringify(templates));
+      document.getElementById('judul').value = '';
+      document.getElementById('isi').value = '';
       tampilkanTemplate();
     }
 
-    function hapusTemplate(index) {
-      if (confirm("Yakin ingin menghapus template ini?")) {
-        templates.splice(index, 1);
-        localStorage.setItem("templates", JSON.stringify(templates));
+    function hapusTemplate(i) {
+      if (confirm('Yakin ingin menghapus template ini?')) {
+        templates.splice(i,1);
+        localStorage.setItem('templates', JSON.stringify(templates));
         tampilkanTemplate();
       }
     }
 
     function salinTemplate(isi) {
-      navigator.clipboard.writeText(isi).then(() => {
-        alert("Template berhasil disalin!");
-      });
+      navigator.clipboard.writeText(isi).then(() => alert('Template berhasil disalin!'));
     }
 
     function tampilkanTemplate() {
-      const keyword = (document.getElementById("cari").value || "").toLowerCase();
-      const container = document.getElementById("daftarTemplate");
-      container.innerHTML = "";
+      const kw = document.getElementById('searchInput').value?.toLowerCase() || '';
+      const c = document.getElementById('daftarTemplate');
+      c.innerHTML = '';
+      if (!templates.length) return c.innerHTML = '<p>Tidak ada template tersimpan.</p>';
+      templates.forEach((t,i) => {
+        if (t.judul.toLowerCase().includes(kw) || t.isi.toLowerCase().includes(kw)) {
+          const d = document.createElement('div');
+          d.className = 'template';
+          d.innerHTML = `<strong>${t.judul}</strong><p>${t.isi}</p><div class="flex"><button onclick="salinTemplate(\`${t.isi.replace(/`/g,'\\`')}\`)">Salin</button><button onclick="hapusTemplate(${i})">Hapus</button></div>`;
+          c.appendChild(d);
+        }
+      });
+    }
 
-      if (!Array.isArray(templates) || templates.length === 0) {
-        container.innerHTML = "<p>Tidak ada template tersimpan.</p>";
-        return;
-      }
+    function toggleSearch() {
+      const si = document.getElementById('searchInput');
+      si.style.display = si.style.display === 'inline-block' ? 'none' : 'inline-block';
+      if (si.style.display === 'inline-block') si.focus();
+    }
 
-      templates
-        .map((t, i) => ({ ...t, index: i }))
-        .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)))
-        .forEach(t => {
-          const div = document.createElement("div");
-          div.className = "template";
-          div.innerHTML = `
-            <strong>${t.judul}</strong>
-            <p>${t.isi}</p>
-            <div class="flex">
-              <button onclick="salinTemplate(\`${t.isi.replace(/`/g, "\\`")}\`)">Salin</button>
-              <button onclick="hapusTemplate(${t.index})">Hapus</button>
-            </div>
-          `;
-          container.appendChild(div);
-        });
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
     }
 
     tampilkanTemplate();
