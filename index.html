@@ -122,10 +122,17 @@
         return;
       }
 
+      // Cegah judul duplikat
+      if (templates.some(t => t.judul.toLowerCase() === judul.toLowerCase())) {
+        alert("Template dengan judul ini sudah ada.");
+        return;
+      }
+
       templates.push({ judul, isi });
       localStorage.setItem("templates", JSON.stringify(templates));
       document.getElementById("judul").value = "";
       document.getElementById("isi").value = "";
+      document.getElementById("searchInput").value = "";
       tampilkanTemplate();
     }
 
@@ -133,11 +140,13 @@
       if (confirm("Yakin ingin menghapus template ini?")) {
         templates.splice(index, 1);
         localStorage.setItem("templates", JSON.stringify(templates));
+        document.getElementById("searchInput").value = "";
         tampilkanTemplate();
       }
     }
 
-    function salinTemplate(isi) {
+    function salinTemplate(encodedIsi) {
+      const isi = decodeURIComponent(escape(atob(encodedIsi)));
       navigator.clipboard.writeText(isi).then(() => {
         alert("Template berhasil disalin!");
       });
@@ -163,7 +172,7 @@
             <strong>${t.judul}</strong>
             <p>${t.isi}</p>
             <div class="flex">
-              <button onclick="salinTemplate(\`${t.isi.replace(/`/g, "\\`")}\`)">Salin</button>
+              <button onclick="salinTemplate('${btoa(unescape(encodeURIComponent(t.isi)))}')">Salin</button>
               <button onclick="hapusTemplate(${t.index})">Hapus</button>
             </div>
           `;
@@ -181,11 +190,22 @@
 
     function toggleDarkMode() {
       const isDark = document.body.style.backgroundColor === "#1a1a1a";
+      const newMode = isDark ? "light" : "dark";
+      localStorage.setItem("darkMode", newMode);
+
       document.body.style.backgroundColor = isDark ? "#f0f4ff" : "#1a1a1a";
       document.body.style.color = isDark ? "#003366" : "#f0f4ff";
     }
 
-    tampilkanTemplate();
+    // Atur mode gelap saat load
+    window.addEventListener("DOMContentLoaded", () => {
+      const mode = localStorage.getItem("darkMode");
+      if (mode === "dark") {
+        document.body.style.backgroundColor = "#1a1a1a";
+        document.body.style.color = "#f0f4ff";
+      }
+      tampilkanTemplate();
+    });
   </script>
 </body>
 </html>
