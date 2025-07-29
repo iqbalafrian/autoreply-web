@@ -1,309 +1,142 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AutoReply</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        body.dark-mode {
-            background-color: #1e1e1e;
-            color: #f0f0f0;
-        }
-
-        header {
-            background-color: #007BFF;
-            color: white;
-            padding: 1rem;
-            font-size: 1.5rem;
-            position: relative;
-            text-align: center;
-        }
-
-        .toggle-mode {
-            position: absolute;
-            top: 50%;
-            right: 1rem;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .toggle-mode img,
-        .search-btn img {
-            width: 24px;
-            height: 24px;
-        }
-
-        .search-btn {
-            position: absolute;
-            top: 50%;
-            left: 1rem;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        main {
-            padding: 1rem;
-        }
-
-        textarea,
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 0.5rem;
-            margin: 0.5rem 0;
-            font-size: 1rem;
-        }
-
-        button {
-            padding: 0.5rem 1rem;
-            margin: 0.25rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .primary {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        .danger {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .template {
-            background-color: #e9f5ff;
-            padding: 0.5rem;
-            margin: 0.5rem 0;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        body.dark-mode .template {
-            background-color: #333;
-        }
-
-        .template input[type="checkbox"] {
-            margin-right: 0.5rem;
-        }
-
-        .template-content {
-            flex: 1;
-            margin-right: 0.5rem;
-        }
-
-        .pinned {
-            border: 2px solid gold;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoReplyEditor</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f4ff;
+      color: #003366;
+      padding: 20px;
+    }
+    input, textarea, select, button {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .template {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e9f0ff;
+      border-radius: 8px;
+    }
+    .flex {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
 </head>
-
 <body>
-    <header>
-        <button class="search-btn" onclick="toggleSearch()">
-            <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Cari">
-        </button>
-        AutoReply
-        <button class="toggle-mode" onclick="toggleDarkMode()">
-            <img src="https://cdn-icons-png.flaticon.com/512/169/169367.png" alt="Mode Gelap">
-        </button>
-    </header>
-    <main>
-        <input type="text" id="searchInput" placeholder="Cari template..." oninput="renderTemplates()" style="display:none">
-        <input type="text" id="titleInput" placeholder="Masukkan judul...">
-        <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
+  <h1>AutoReplyEditor</h1>
+  <div class="card">
+    <label>Judul Template</label>
+    <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
 
-        <select id="categoryInput">
-        </select>
+    <label>Isi Template</label>
+    <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
 
-        <input type="text" id="newCategoryInput" placeholder="Tambahkan kategori baru...">
-        <button onclick="addCategory()">Tambah Kategori</button>
+    <button onclick="simpanTemplate()">Simpan Template</button>
+  </div>
 
-        <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
-        <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
-        <button onclick="selectAll()">Pilih Semua</button>
-        <div id="templates"></div>
-    </main>
+  <div class="card">
+    <h2>Daftar Template</h2>
+    <input type="text" id="cari" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
+    <div id="daftarTemplate"></div>
+  </div>
 
-    <script>
-        let templates = JSON.parse(localStorage.getItem("templates") || "[]");
-        let categories = JSON.parse(localStorage.getItem("categories") || "[]");
-        let editingIndex = -1;
+  <script>
+    let templates = [];
 
-        function saveTemplates() {
-            localStorage.setItem("templates", JSON.stringify(templates));
-        }
+    // Coba load dari localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem("templates"));
+      if (Array.isArray(stored)) {
+        templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
+      }
+    } catch (e) {
+      localStorage.removeItem("templates"); // Hapus data rusak
+    }
 
-        function saveCategories() {
-            localStorage.setItem("categories", JSON.stringify(categories));
-        }
+    function simpanTemplate() {
+      const judul = document.getElementById("judul").value.trim();
+      const isi = document.getElementById("isi").value.trim();
 
-        function renderCategories() {
-            const categoryInput = document.getElementById("categoryInput");
-            categoryInput.innerHTML = "<option value=''>- Pilih Kategori -</option>";
-            categories.forEach(cat => {
-                const option = document.createElement("option");
-                option.value = cat;
-                option.textContent = cat;
-                categoryInput.appendChild(option);
-            });
-        }
+      if (!judul || !isi) {
+        alert("Judul dan isi harus diisi.");
+        return;
+      }
 
-        function addCategory() {
-            const newCatInput = document.getElementById("newCategoryInput");
-            const newCat = newCatInput.value.trim();
-            if (newCat && !categories.includes(newCat)) {
-                categories.push(newCat);
-                saveCategories();
-                renderCategories();
-                newCatInput.value = "";
-            }
-        }
+      templates.push({ judul, isi });
+      localStorage.setItem("templates", JSON.stringify(templates));
+      document.getElementById("judul").value = "";
+      document.getElementById("isi").value = "";
+      tampilkanTemplate();
+    }
 
-        function renderTemplates() {
-            const container = document.getElementById("templates");
-            const keyword = document.getElementById("searchInput").value.toLowerCase();
-            container.innerHTML = "";
-            const pinned = templates.filter(t => t.pinned);
-            const others = templates.filter(t => !t.pinned);
-            const all = [...pinned, ...others];
+    function hapusTemplate(index) {
+      if (confirm("Yakin ingin menghapus template ini?")) {
+        templates.splice(index, 1);
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
+      }
+    }
 
-            all.forEach((item, realIndex) => {
-                if (!item.title.toLowerCase().includes(keyword) && !item.text.toLowerCase().includes(keyword)) return;
-                const div = document.createElement("div");
-                div.className = "template" + (item.pinned ? " pinned" : "");
+    function salinTemplate(isi) {
+      navigator.clipboard.writeText(isi).then(() => {
+        alert("Template berhasil disalin!");
+      });
+    }
 
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.className = "template-checkbox";
+    function tampilkanTemplate() {
+      const keyword = (document.getElementById("cari").value || "").toLowerCase();
+      const container = document.getElementById("daftarTemplate");
+      container.innerHTML = "";
 
-                const contentDiv = document.createElement("div");
-                contentDiv.className = "template-content";
-                contentDiv.innerHTML = `<strong>${item.title}</strong><br>${item.text}<br><em>${item.category || ''}</em>`;
+      if (!Array.isArray(templates) || templates.length === 0) {
+        container.innerHTML = "<p>Tidak ada template tersimpan.</p>";
+        return;
+      }
 
-                const editBtn = document.createElement("button");
-                editBtn.textContent = "Edit";
-                editBtn.onclick = () => editTemplate(realIndex);
+      templates
+        .map((t, i) => ({ ...t, index: i }))
+        .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)))
+        .forEach(t => {
+          const div = document.createElement("div");
+          div.className = "template";
+          div.innerHTML = `
+            <strong>${t.judul}</strong>
+            <p>${t.isi}</p>
+            <div class="flex">
+              <button onclick="salinTemplate(\`${t.isi.replace(/`/g, "\\`")}\`)">Salin</button>
+              <button onclick="hapusTemplate(${t.index})">Hapus</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+    }
 
-                const copyBtn = document.createElement("button");
-                copyBtn.textContent = "Salin";
-                copyBtn.onclick = () => copyToClipboard(item.text);
-
-                const pinBtn = document.createElement("button");
-                pinBtn.textContent = item.pinned ? "Unpin" : "Pin";
-                pinBtn.onclick = () => togglePin(item.title);
-
-                div.appendChild(checkbox);
-                div.appendChild(contentDiv);
-                div.appendChild(editBtn);
-                div.appendChild(copyBtn);
-                div.appendChild(pinBtn);
-                container.appendChild(div);
-            });
-        }
-
-        function addOrUpdateTemplate() {
-            const titleInput = document.getElementById("titleInput");
-            const templateInput = document.getElementById("templateInput");
-            const categoryInput = document.getElementById("categoryInput");
-            const title = titleInput.value.trim();
-            const text = templateInput.value.trim();
-            const category = categoryInput.value;
-            if (!title || !text) return;
-
-            if (!categories.includes(category) && category) {
-                categories.push(category);
-                saveCategories();
-                renderCategories();
-            }
-
-            if (editingIndex === -1) {
-                if (templates.some(t => t.title === title)) {
-                    alert("Judul sudah ada, gunakan judul lain.");
-                    return;
-                }
-                templates.push({ title, text, category, pinned: false });
-            } else {
-                templates[editingIndex] = { ...templates[editingIndex], title, text, category };
-                editingIndex = -1;
-                document.getElementById("addBtn").textContent = "Tambah Template";
-            }
-
-            saveTemplates();
-            renderTemplates();
-            titleInput.value = "";
-            templateInput.value = "";
-            categoryInput.value = "";
-        }
-
-        function editTemplate(index) {
-            const item = templates[index];
-            document.getElementById("titleInput").value = item.title;
-            document.getElementById("templateInput").value = item.text;
-            document.getElementById("categoryInput").value = item.category || "";
-            editingIndex = index;
-            document.getElementById("addBtn").textContent = "Simpan Edit";
-        }
-
-        function deleteSelected() {
-            const checkboxes = document.querySelectorAll(".template-checkbox");
-            const remainingTemplates = [];
-            checkboxes.forEach((cb, i) => {
-                if (!cb.checked) {
-                    remainingTemplates.push(templates[i]);
-                }
-            });
-            templates = remainingTemplates;
-            saveTemplates();
-            renderTemplates();
-        }
-
-        function selectAll() {
-            const checkboxes = document.querySelectorAll(".template-checkbox");
-            checkboxes.forEach(cb => cb.checked = true);
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => alert("Disalin ke clipboard"));
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-        }
-
-        function togglePin(title) {
-            templates = templates.map(t => t.title === title ? { ...t, pinned: !t.pinned } : t);
-            saveTemplates();
-            renderTemplates();
-        }
-
-        function toggleSearch() {
-            const searchInput = document.getElementById("searchInput");
-            searchInput.style.display = searchInput.style.display === "none" ? "block" : "none";
-            if (searchInput.style.display === "block") searchInput.focus();
-        }
-
-        renderCategories();
-        renderTemplates();
-    </script>
+    tampilkanTemplate();
+  </script>
 </body>
-
 </html>
