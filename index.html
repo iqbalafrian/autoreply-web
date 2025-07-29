@@ -6,156 +6,186 @@
   <title>AutoReply</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: white;
-      color: black;
-      transition: background 0.3s, color 0.3s;
+      font-family: sans-serif;
+      background-color: #f0f4ff;
+      color: #003366;
+      padding: 20px;
     }
-
-    header {
-      background-color: #007BFF;
-      color: white;
+    input, textarea, select, button {
       padding: 10px;
-      text-align: center;
-      position: relative;
+      margin: 5px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
     }
-
-    .icon-container {
-      position: absolute;
-      top: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .search-toggle {
-      left: 10px;
-    }
-
-    .dark-toggle {
-      right: 10px;
-    }
-
-    .icon-btn {
-      background: white;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    button {
+      background-color: #007bff;
+      color: white;
       cursor: pointer;
-      margin-left: 8px;
       border: none;
     }
-
-    #searchBar {
-      display: none;
-      margin: 10px;
-      padding: 6px;
-      border: 1px solid #ccc;
-      width: calc(100% - 40px);
+    button:hover {
+      background-color: #0056b3;
     }
-
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
     .template {
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background-color: #EAF4FF;
+      margin-top: 10px;
       padding: 10px;
-      margin: 10px;
+      background: #e9f0ff;
+      border-radius: 8px;
+    }
+    .flex {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 20px;
     }
-
-    .template p {
-      margin: 0;
-      flex: 1;
-    }
-
-    .template button {
-      background-color: #007BFF;
-      color: white;
+    .icon-button {
+      background-color: #e0e7ff;
       border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      margin-left: 10px;
+      border-radius: 50%;
+      padding: 10px;
       cursor: pointer;
+      font-size: 18px;
     }
-
-    .dark-mode {
-      background-color: #222;
-      color: white;
+    .icon-button:hover {
+      background-color: #c7d2fe;
     }
-
-    .dark-mode header {
-      background-color: #333;
+    #searchInput {
+      display: none;
+      margin-left: 10px;
+      width: auto;
     }
-
-    .dark-mode .template {
-      background-color: #444;
-      border-color: #666;
-    }
-
-    .dark-mode .template button {
-      background-color: #666;
+    svg {
+      vertical-align: middle;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="icon-container search-toggle">
-      <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+  <div class="toolbar">
+    <div>
+      <button class="icon-button" onclick="toggleSearch()" title="Cari">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="#003366" viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.293 14.707l4.5 4.5 1.414-1.414-4.5-4.5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/></svg>
+      </button>
+      <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
     </div>
-    <h1>AutoReply</h1>
-    <div class="icon-container dark-toggle">
-      <button class="icon-btn" onclick="toggleDarkMode()">🌙</button>
-    </div>
-  </header>
+    <h1 style="margin: 0;">AutoReply</h1>
+    <button class="icon-button" onclick="toggleDarkMode()" title="Mode Gelap">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="#003366" viewBox="0 0 24 24"><path d="M21.64 13.58A9 9 0 1110.42 2.36a7 7 0 1011.22 11.22z"/></svg>
+    </button>
+  </div>
 
-  <input type="text" id="searchBar" placeholder="Cari template..." onkeyup="searchTemplates()" />
+  <div class="card">
+    <label>Judul Template</label>
+    <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
 
-  <div id="templateList">
-    <div class="template">
-      <p>Terima kasih telah menghubungi kami. Kami akan segera membalas pesan Anda.</p>
-      <button onclick="copyText(this)">Salin</button>
-    </div>
-    <div class="template">
-      <p>Halo! Ada yang bisa kami bantu hari ini?</p>
-      <button onclick="copyText(this)">Salin</button>
-    </div>
-    <div class="template">
-      <p>Kami sedang offline sekarang. Silakan tinggalkan pesan.</p>
-      <button onclick="copyText(this)">Salin</button>
-    </div>
+    <label>Isi Template</label>
+    <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
+
+    <button onclick="simpanTemplate()">Simpan Template</button>
+  </div>
+
+  <div class="card">
+    <h2>Daftar Template</h2>
+    <div id="daftarTemplate"></div>
   </div>
 
   <script>
-    function copyText(button) {
-      const text = button.previousElementSibling.textContent;
-      navigator.clipboard.writeText(text);
-      button.textContent = "Tersalin!";
-      setTimeout(() => button.textContent = "Salin", 1500);
+    let templates = [];
+
+    try {
+      const stored = JSON.parse(localStorage.getItem("templates"));
+      if (Array.isArray(stored)) {
+        templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
+      }
+    } catch (e) {
+      localStorage.removeItem("templates");
     }
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
+    function simpanTemplate() {
+      const judul = document.getElementById("judul").value.trim();
+      const isi = document.getElementById("isi").value.trim();
+
+      if (!judul || !isi) {
+        alert("Judul dan isi harus diisi.");
+        return;
+      }
+
+      templates.push({ judul, isi });
+      localStorage.setItem("templates", JSON.stringify(templates));
+      document.getElementById("judul").value = "";
+      document.getElementById("isi").value = "";
+      tampilkanTemplate();
+    }
+
+    function hapusTemplate(index) {
+      if (confirm("Yakin ingin menghapus template ini?")) {
+        templates.splice(index, 1);
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
+      }
+    }
+
+    function salinTemplate(isi) {
+      navigator.clipboard.writeText(isi).then(() => {
+        alert("Template berhasil disalin!");
+      });
+    }
+
+    function tampilkanTemplate() {
+      const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
+      const container = document.getElementById("daftarTemplate");
+      container.innerHTML = "";
+
+      if (!Array.isArray(templates) || templates.length === 0) {
+        container.innerHTML = "<p>Tidak ada template tersimpan.</p>";
+        return;
+      }
+
+      templates
+        .map((t, i) => ({ ...t, index: i }))
+        .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)))
+        .forEach(t => {
+          const div = document.createElement("div");
+          div.className = "template";
+          div.innerHTML = `
+            <strong>${t.judul}</strong>
+            <p>${t.isi}</p>
+            <div class="flex">
+              <button onclick="salinTemplate(\`${t.isi.replace(/`/g, "\\`")}\`)">Salin</button>
+              <button onclick="hapusTemplate(${t.index})">Hapus</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
     }
 
     function toggleSearch() {
-      const bar = document.getElementById("searchBar");
-      bar.style.display = bar.style.display === "block" ? "none" : "block";
+      const input = document.getElementById("searchInput");
+      input.style.display = input.style.display === "none" || input.style.display === "" ? "inline-block" : "none";
+      if (input.style.display === "inline-block") {
+        input.focus();
+      }
     }
 
-    function searchTemplates() {
-      const filter = document.getElementById("searchBar").value.toLowerCase();
-      const templates = document.querySelectorAll("#templateList .template");
-      templates.forEach(template => {
-        const text = template.querySelector("p").textContent.toLowerCase();
-        template.style.display = text.includes(filter) ? "flex" : "none";
-      });
+    function toggleDarkMode() {
+      const isDark = document.body.style.backgroundColor === "#1a1a1a";
+      document.body.style.backgroundColor = isDark ? "#f0f4ff" : "#1a1a1a";
+      document.body.style.color = isDark ? "#003366" : "#f0f4ff";
     }
+
+    tampilkanTemplate();
   </script>
 </body>
 </html>
