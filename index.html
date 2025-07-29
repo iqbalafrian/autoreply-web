@@ -3,82 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AutoReplyEditor</title>
+  <title>AutoReply</title>
   <style>
-    :root {
-      --bg-light: #f0f4ff;
-      --text-light: #003366;
-      --bg-dark: #1e1e1e;
-      --text-dark: #ffffff;
-    }
-
     body {
       font-family: sans-serif;
-      margin: 0;
+      background-color: #f0f4ff;
+      color: #003366;
       padding: 20px;
-      background-color: var(--bg-light);
-      color: var(--text-light);
-      transition: background 0.3s, color 0.3s;
     }
-
-    body.dark {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
-
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .icon-button {
-      width: 40px;
-      height: 40px;
-      background-color: rgba(0,0,0,0.05);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .icon-button:hover {
-      background-color: rgba(0,0,0,0.1);
-    }
-
-    .icon-button svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
-
-    #searchBar {
-      display: none;
-      margin-top: 10px;
-    }
-
-    input, textarea, button {
-      width: 100%;
+    input, textarea, select, button {
       padding: 10px;
       margin: 5px 0;
       border-radius: 8px;
       border: 1px solid #ccc;
+      width: 100%;
     }
-
     button {
       background-color: #007bff;
       color: white;
-      border: none;
       cursor: pointer;
+      border: none;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
     .card {
       background: white;
       border-radius: 12px;
@@ -86,22 +34,12 @@
       margin-bottom: 20px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-
-    body.dark .card {
-      background-color: #2c2c2c;
-    }
-
     .template {
       margin-top: 10px;
       padding: 10px;
       background: #e9f0ff;
       border-radius: 8px;
     }
-
-    body.dark .template {
-      background-color: #333;
-    }
-
     .flex {
       display: flex;
       gap: 10px;
@@ -110,31 +48,20 @@
   </style>
 </head>
 <body>
-  <div class="toolbar">
-    <div class="icon-button" onclick="toggleSearchBar()" title="Cari Template">
-      🔍
-    </div>
-    <div class="icon-button" onclick="toggleDarkMode()" title="Mode Gelap">
-      🌙
-    </div>
-  </div>
-
-  <div id="searchBar">
-    <input type="text" id="cari" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
-  </div>
-
-  <h1>AutoReplyEditor</h1>
-
+  <h1 style="text-align: center;">AutoReply</h1>
   <div class="card">
     <label>Judul Template</label>
     <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
+
     <label>Isi Template</label>
     <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
+
     <button onclick="simpanTemplate()">Simpan Template</button>
   </div>
 
   <div class="card">
     <h2>Daftar Template</h2>
+    <input type="text" id="cari" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
     <div id="daftarTemplate"></div>
   </div>
 
@@ -146,7 +73,7 @@
       if (Array.isArray(stored)) {
         templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
       }
-    } catch {
+    } catch (e) {
       localStorage.removeItem("templates");
     }
 
@@ -181,7 +108,7 @@
     }
 
     function tampilkanTemplate() {
-      const keyword = (document.getElementById("cari")?.value || "").toLowerCase();
+      const keyword = (document.getElementById("cari").value || "").toLowerCase();
       const container = document.getElementById("daftarTemplate");
       container.innerHTML = "";
 
@@ -206,15 +133,6 @@
           `;
           container.appendChild(div);
         });
-    }
-
-    function toggleSearchBar() {
-      const bar = document.getElementById("searchBar");
-      bar.style.display = bar.style.display === "block" ? "none" : "block";
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
     }
 
     tampilkanTemplate();
