@@ -2,128 +2,209 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoReply Web</title>
-  <link rel="manifest" href="manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoReply</title>
   <style>
     body {
       font-family: sans-serif;
-      background-color: white;
-      color: #000;
-      margin: 0;
-      padding: 1rem;
-      transition: background-color 0.3s, color 0.3s;
+      background-color: #f0f4ff;
+      color: #003366;
+      padding: 20px;
     }
-    body.dark {
-      background-color: #1e1e1e;
-      color: #fff;
+    input, textarea, select, button {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .template {
-      background-color: #e0f0ff;
-      margin: 0.5rem 0;
-      padding: 1rem;
+      margin-top: 10px;
+      padding: 10px;
+      background: #e9f0ff;
       border-radius: 8px;
+    }
+    .flex {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
-    body.dark .template {
-      background-color: #333;
+    .icon-button {
+      background-color: #e0e7ff;
+      border: none;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 18px;
     }
-    button {
-      margin-left: 0.5rem;
+    .icon-button:hover {
+      background-color: #c7d2fe;
     }
-    #templates { margin-top: 1rem; }
+    #searchInput {
+      display: none;
+      margin-left: 10px;
+      width: auto;
+    }
+    svg {
+      vertical-align: middle;
+    }
+    [data-theme='dark'] {
+      background-color: #1a1a1a;
+      color: #f0f4ff;
+    }
+    [data-theme='dark'] .card {
+      background-color: #2a2a2a;
+    }
+    [data-theme='dark'] .template {
+      background: #333;
+      color: #f0f4ff;
+    }
+    [data-theme='dark'] input,
+    [data-theme='dark'] textarea {
+      background-color: #2a2a2a;
+      color: #f0f4ff;
+      border: 1px solid #555;
+    }
+    [data-theme='dark'] #searchInput {
+      background-color: #2a2a2a;
+      color: #f0f4ff;
+    }
   </style>
 </head>
 <body>
-  <h2>📋 Template AutoReply</h2>
-  <input type="text" id="search" placeholder="🏸 Cari template..." oninput="renderTemplates()" style="width:100%; padding: 8px;">
-  <br><br>
-  <textarea id="newTemplate" placeholder="Tulis template baru..." style="width:100%; height:80px;"></textarea><br>
-  <button onclick="addTemplate()">➕ Simpan Template</button>
-  <div id="templates"></div>
-  <button onclick="toggleDarkMode()">🌓</button>
+  <div class="toolbar">
+    <div>
+      <button class="icon-button" onclick="toggleSearch()" title="Cari">
+        🏸
+      </button>
+      <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
+    </div>
+    <h1 style="margin: 0;">AutoReply</h1>
+    <button class="icon-button" onclick="toggleDarkMode()" title="Mode Gelap/Terang">
+      🌓
+    </button>
+  </div>
+
+  <div class="card">
+    <label>Judul Template</label>
+    <input type="text" id="judul" placeholder="Contoh: Balasan Otomatis Promo"/>
+
+    <label>Isi Template</label>
+    <textarea id="isi" rows="5" placeholder="Tulis isi balasan di sini..."></textarea>
+
+    <button onclick="simpanTemplate()">Simpan Template</button>
+  </div>
+
+  <div class="card">
+    <h2>Daftar Template</h2>
+    <div id="daftarTemplate"></div>
+  </div>
 
   <script>
-    const STORAGE_KEY = 'autoreply_templates';
-    let isDark = false;
+    let templates = [];
 
-    function loadTemplates() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    try {
+      const stored = JSON.parse(localStorage.getItem("templates"));
+      if (Array.isArray(stored)) {
+        templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
+      }
+    } catch (e) {
+      localStorage.removeItem("templates");
     }
 
-    function saveTemplates(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    function simpanTemplate() {
+      const judul = document.getElementById("judul").value.trim();
+      const isi = document.getElementById("isi").value.trim();
+
+      if (!judul || !isi) {
+        alert("Judul dan isi harus diisi.");
+        return;
+      }
+
+      templates.unshift({ judul, isi });
+      localStorage.setItem("templates", JSON.stringify(templates));
+      document.getElementById("judul").value = "";
+      document.getElementById("isi").value = "";
+      tampilkanTemplate();
     }
 
-    function renderTemplates() {
-      const container = document.getElementById("templates");
-      const query = document.getElementById("search").value.toLowerCase();
-      const templates = loadTemplates();
+    function hapusTemplate(index) {
+      if (confirm("Yakin ingin menghapus template ini?")) {
+        templates.splice(index, 1);
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
+      }
+    }
+
+    function salinTemplate(isi) {
+      navigator.clipboard.writeText(isi);
+    }
+
+    function tampilkanTemplate() {
+      const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
+      const container = document.getElementById("daftarTemplate");
       container.innerHTML = "";
 
+      if (!Array.isArray(templates) || templates.length === 0) {
+        container.innerHTML = "<p>Tidak ada template tersimpan.</p>";
+        return;
+      }
+
       templates
-        .filter(t => t.toLowerCase().includes(query))
-        .forEach((text, index) => {
+        .map((t, i) => ({ ...t, index: i }))
+        .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)))
+        .forEach(t => {
           const div = document.createElement("div");
           div.className = "template";
           div.innerHTML = `
-            <div style="flex:1;">${text}</div>
-            <div>
-              <button onclick="copyText(\`${text.replace(/`/g, "\\`")}\`)">📋</button>
-              <button onclick="deleteTemplate(${index})">❌</button>
+            <strong>${t.judul}</strong>
+            <p>${t.isi}</p>
+            <div class="flex">
+              <button onclick="salinTemplate(\`${t.isi.replace(/`/g, "\\`")}\`)">Salin</button>
+              <button onclick="hapusTemplate(${t.index})">Hapus</button>
             </div>
           `;
           container.appendChild(div);
         });
     }
 
-    function addTemplate() {
-      const textarea = document.getElementById("newTemplate");
-      const text = textarea.value.trim();
-      if (!text) return;
-
-      const templates = loadTemplates();
-      templates.unshift(text);
-      saveTemplates(templates);
-      textarea.value = "";
-      renderTemplates();
-    }
-
-    function deleteTemplate(index) {
-      const templates = loadTemplates();
-      templates.splice(index, 1);
-      saveTemplates(templates);
-      renderTemplates();
-    }
-
-    function copyText(text) {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).catch(() => fallbackCopyText(text));
-      } else {
-        fallbackCopyText(text);
+    function toggleSearch() {
+      const input = document.getElementById("searchInput");
+      input.style.display = input.style.display === "none" || input.style.display === "" ? "inline-block" : "none";
+      if (input.style.display === "inline-block") {
+        input.focus();
       }
     }
 
-    function fallbackCopyText(text) {
-      const input = document.createElement("textarea");
-      input.value = text;
-      input.style.position = "fixed";
-      input.style.left = "-9999px";
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("copy");
-      document.body.removeChild(input);
-    }
-
     function toggleDarkMode() {
-      isDark = !isDark;
-      document.body.classList.toggle("dark", isDark);
+      const body = document.body;
+      const isDark = body.getAttribute("data-theme") === "dark";
+      body.setAttribute("data-theme", isDark ? "light" : "dark");
     }
 
-    renderTemplates();
+    tampilkanTemplate();
   </script>
 </body>
 </html>
