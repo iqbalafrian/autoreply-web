@@ -32,6 +32,22 @@
         .toggle-mode {
             position: absolute;
             top: 50%;
+            right: 3rem;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .toggle-mode img,
+        .search-btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .search-btn {
+            position: absolute;
+            top: 50%;
             right: 1rem;
             transform: translateY(-50%);
             background: none;
@@ -39,17 +55,13 @@
             cursor: pointer;
         }
 
-        .toggle-mode img {
-            width: 24px;
-            height: 24px;
-        }
-
         main {
             padding: 1rem;
         }
 
         textarea,
-        input[type="text"] {
+        input[type="text"],
+        select {
             width: 100%;
             padding: 0.5rem;
             margin: 0.5rem 0;
@@ -97,6 +109,10 @@
             flex: 1;
             margin-right: 0.5rem;
         }
+
+        .pinned {
+            border: 2px solid gold;
+        }
     </style>
 </head>
 
@@ -106,14 +122,23 @@
         <button class="toggle-mode" onclick="toggleDarkMode()">
             <img src="https://cdn-icons-png.flaticon.com/512/169/169367.png" alt="Mode Gelap">
         </button>
+        <button class="search-btn" onclick="toggleSearch()">
+            <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Cari">
+        </button>
     </header>
     <main>
+        <input type="text" id="searchInput" placeholder="Cari template..." oninput="renderTemplates()" style="display:none">
         <input type="text" id="titleInput" placeholder="Masukkan judul...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
+        <select id="categoryInput">
+            <option value="">Pilih Kategori</option>
+            <option value="Umum">Umum</option>
+            <option value="CS">CS</option>
+            <option value="Promo">Promo</option>
+        </select>
         <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
-
         <div id="templates"></div>
     </main>
 
@@ -127,10 +152,16 @@
 
         function renderTemplates() {
             const container = document.getElementById("templates");
+            const keyword = document.getElementById("searchInput").value.toLowerCase();
             container.innerHTML = "";
-            templates.forEach((item, index) => {
+            const pinned = templates.filter(t => t.pinned);
+            const others = templates.filter(t => !t.pinned);
+            const all = [...pinned, ...others];
+
+            all.forEach((item, index) => {
+                if (!item.title.toLowerCase().includes(keyword) && !item.text.toLowerCase().includes(keyword)) return;
                 const div = document.createElement("div");
-                div.className = "template";
+                div.className = "template" + (item.pinned ? " pinned" : "");
 
                 const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
@@ -138,7 +169,7 @@
 
                 const contentDiv = document.createElement("div");
                 contentDiv.className = "template-content";
-                contentDiv.innerHTML = `<strong>${item.title}</strong><br>${item.text}`;
+                contentDiv.innerHTML = `<strong>${item.title}</strong><br>${item.text}<br><em>${item.category || ''}</em>`;
 
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Edit";
@@ -148,10 +179,15 @@
                 copyBtn.textContent = "Salin";
                 copyBtn.onclick = () => copyToClipboard(item.text);
 
+                const pinBtn = document.createElement("button");
+                pinBtn.textContent = item.pinned ? "Unpin" : "Pin";
+                pinBtn.onclick = () => togglePin(index);
+
                 div.appendChild(checkbox);
                 div.appendChild(contentDiv);
                 div.appendChild(editBtn);
                 div.appendChild(copyBtn);
+                div.appendChild(pinBtn);
                 container.appendChild(div);
             });
         }
@@ -159,8 +195,10 @@
         function addOrUpdateTemplate() {
             const titleInput = document.getElementById("titleInput");
             const templateInput = document.getElementById("templateInput");
+            const categoryInput = document.getElementById("categoryInput");
             const title = titleInput.value.trim();
             const text = templateInput.value.trim();
+            const category = categoryInput.value;
             if (!title || !text) return;
 
             if (editingIndex === -1) {
@@ -168,9 +206,9 @@
                     alert("Judul sudah ada, gunakan judul lain.");
                     return;
                 }
-                templates.push({ title, text });
+                templates.push({ title, text, category, pinned: false });
             } else {
-                templates[editingIndex] = { title, text };
+                templates[editingIndex] = { ...templates[editingIndex], title, text, category };
                 editingIndex = -1;
                 document.getElementById("addBtn").textContent = "Tambah Template";
             }
@@ -179,12 +217,14 @@
             renderTemplates();
             titleInput.value = "";
             templateInput.value = "";
+            categoryInput.value = "";
         }
 
         function editTemplate(index) {
             const item = templates[index];
             document.getElementById("titleInput").value = item.title;
             document.getElementById("templateInput").value = item.text;
+            document.getElementById("categoryInput").value = item.category || "";
             editingIndex = index;
             document.getElementById("addBtn").textContent = "Simpan Edit";
         }
@@ -213,6 +253,18 @@
 
         function toggleDarkMode() {
             document.body.classList.toggle("dark-mode");
+        }
+
+        function togglePin(index) {
+            templates[index].pinned = !templates[index].pinned;
+            saveTemplates();
+            renderTemplates();
+        }
+
+        function toggleSearch() {
+            const searchInput = document.getElementById("searchInput");
+            searchInput.style.display = searchInput.style.display === "none" ? "block" : "none";
+            if (searchInput.style.display === "block") searchInput.focus();
         }
 
         renderTemplates();
