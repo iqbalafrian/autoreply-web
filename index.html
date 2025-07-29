@@ -12,6 +12,12 @@
             color: #333;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
         }
 
         header {
@@ -63,6 +69,10 @@
             justify-content: space-between;
         }
 
+        body.dark-mode .template {
+            background-color: #333;
+        }
+
         .template input[type="checkbox"] {
             margin-right: 0.5rem;
         }
@@ -70,6 +80,11 @@
         .template-content {
             flex: 1;
             margin-right: 0.5rem;
+        }
+
+        .template-count {
+            font-weight: bold;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -82,7 +97,9 @@
         <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
+        <button onclick="toggleDarkMode()">Ganti Mode</button>
 
+        <div class="template-count" id="templateCount"></div>
         <div id="templates"></div>
     </main>
 
@@ -92,6 +109,11 @@
 
         function saveTemplates() {
             localStorage.setItem("templates", JSON.stringify(templates));
+        }
+
+        function updateTemplateCount() {
+            const countDiv = document.getElementById("templateCount");
+            countDiv.textContent = `Total Template: ${templates.length}`;
         }
 
         function renderTemplates() {
@@ -123,6 +145,7 @@
                 div.appendChild(copyBtn);
                 container.appendChild(div);
             });
+            updateTemplateCount();
         }
 
         function addOrUpdateTemplate() {
@@ -133,6 +156,10 @@
             if (!title || !text) return;
 
             if (editingIndex === -1) {
+                if (templates.some(t => t.title === title)) {
+                    alert("Judul sudah ada, gunakan judul lain.");
+                    return;
+                }
                 templates.push({ title, text });
             } else {
                 templates[editingIndex] = { title, text };
@@ -174,6 +201,10 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => alert("Disalin ke clipboard"));
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
         }
 
         renderTemplates();
