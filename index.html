@@ -24,7 +24,6 @@
             background-color: #007BFF;
             color: white;
             padding: 1rem;
-            text-align: center;
             font-size: 1.5rem;
             position: relative;
         }
@@ -48,7 +47,7 @@
         .search-btn {
             position: absolute;
             top: 50%;
-            right: 1rem;
+            left: 1rem;
             transform: translateY(-50%);
             background: none;
             border: none;
@@ -119,23 +118,18 @@
 <body>
     <header>
         AutoReply
-        <button class="toggle-mode" onclick="toggleDarkMode()">
-            <img src="https://cdn-icons-png.flaticon.com/512/169/169367.png" alt="Mode Gelap">
-        </button>
         <button class="search-btn" onclick="toggleSearch()">
             <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Cari">
+        </button>
+        <button class="toggle-mode" onclick="toggleDarkMode()">
+            <img src="https://cdn-icons-png.flaticon.com/512/169/169367.png" alt="Mode Gelap">
         </button>
     </header>
     <main>
         <input type="text" id="searchInput" placeholder="Cari template..." oninput="renderTemplates()" style="display:none">
         <input type="text" id="titleInput" placeholder="Masukkan judul...">
         <textarea id="templateInput" rows="3" placeholder="Tulis isi template kamu di sini..."></textarea>
-        <select id="categoryInput">
-            <option value="">Pilih Kategori</option>
-            <option value="Umum">Umum</option>
-            <option value="CS">CS</option>
-            <option value="Promo">Promo</option>
-        </select>
+        <input type="text" id="categoryInput" placeholder="Tambahkan kategori...">
         <button id="addBtn" class="primary" onclick="addOrUpdateTemplate()">Tambah Template</button>
         <button class="danger" onclick="deleteSelected()">Hapus Terpilih</button>
         <button onclick="selectAll()">Pilih Semua</button>
@@ -198,7 +192,7 @@
             const categoryInput = document.getElementById("categoryInput");
             const title = titleInput.value.trim();
             const text = templateInput.value.trim();
-            const category = categoryInput.value;
+            const category = categoryInput.value.trim();
             if (!title || !text) return;
 
             if (editingIndex === -1) {
