@@ -1,171 +1,161 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AutoReply</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f0f4ff;
-      color: #333;
+      background-color: white;
+      color: black;
+      transition: background 0.3s, color 0.3s;
     }
 
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #4a90e2;
+      background-color: #007BFF;
       color: white;
-      padding: 10px 20px;
+      padding: 10px;
+      text-align: center;
+      position: relative;
     }
 
-    .search-icon,
-    .darkmode-icon {
-      cursor: pointer;
-      background-color: white;
-      color: #4a90e2;
+    .icon-container {
+      position: absolute;
+      top: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-toggle {
+      left: 10px;
+    }
+
+    .dark-toggle {
+      right: 10px;
+    }
+
+    .icon-btn {
+      background: white;
       border-radius: 50%;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       display: flex;
-      align-items: center;
       justify-content: center;
-      margin-left: 10px;
-    }
-
-    .search-container {
-      display: flex;
       align-items: center;
+      cursor: pointer;
+      margin-left: 8px;
+      border: none;
     }
 
-    #searchInput {
+    #searchBar {
       display: none;
-      margin-left: 10px;
+      margin: 10px;
       padding: 6px;
+      border: 1px solid #ccc;
+      width: calc(100% - 40px);
     }
 
     .template {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #EAF4FF;
+      padding: 10px;
+      margin: 10px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      padding: 10px;
-      background: #e9f0ff;
-      border-radius: 8px;
-      margin: 10px;
-      max-width: 100%;
+      align-items: center;
     }
 
-    .template-content {
+    .template p {
+      margin: 0;
       flex: 1;
     }
 
-    .template-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-left: 10px;
-    }
-
-    .template-buttons button {
-      padding: 4px 8px;
-      font-size: 0.85rem;
-      border: none;
-      background: #4a90e2;
+    .template button {
+      background-color: #007BFF;
       color: white;
-      border-radius: 4px;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-left: 10px;
       cursor: pointer;
     }
 
-    .template-buttons button:hover {
-      background: #357ab8;
+    .dark-mode {
+      background-color: #222;
+      color: white;
+    }
+
+    .dark-mode header {
+      background-color: #333;
+    }
+
+    .dark-mode .template {
+      background-color: #444;
+      border-color: #666;
+    }
+
+    .dark-mode .template button {
+      background-color: #666;
     }
   </style>
 </head>
-
 <body>
   <header>
-    <div class="search-container">
-      <div class="search-icon" onclick="toggleSearch()">🔍</div>
-      <input type="text" id="searchInput" placeholder="Cari template..." oninput="tampilkanTemplate()">
+    <div class="icon-container search-toggle">
+      <button class="icon-btn" onclick="toggleSearch()">🔍</button>
     </div>
-    <h1 style="margin: 0; text-align: center; flex: 1;">AutoReply</h1>
-    <div class="darkmode-icon" onclick="toggleDarkMode()">🌙</div>
+    <h1>AutoReply</h1>
+    <div class="icon-container dark-toggle">
+      <button class="icon-btn" onclick="toggleDarkMode()">🌙</button>
+    </div>
   </header>
 
-  <main style="padding: 20px">
-    <div id="daftarTemplate"></div>
-  </main>
+  <input type="text" id="searchBar" placeholder="Cari template..." onkeyup="searchTemplates()" />
+
+  <div id="templateList">
+    <div class="template">
+      <p>Terima kasih telah menghubungi kami. Kami akan segera membalas pesan Anda.</p>
+      <button onclick="copyText(this)">Salin</button>
+    </div>
+    <div class="template">
+      <p>Halo! Ada yang bisa kami bantu hari ini?</p>
+      <button onclick="copyText(this)">Salin</button>
+    </div>
+    <div class="template">
+      <p>Kami sedang offline sekarang. Silakan tinggalkan pesan.</p>
+      <button onclick="copyText(this)">Salin</button>
+    </div>
+  </div>
 
   <script>
-    let templates = [
-      { judul: 'Salam', isi: 'Halo! Ada yang bisa saya bantu?' },
-      { judul: 'Terima Kasih', isi: 'Terima kasih telah menghubungi kami!' }
-    ];
-
-    function toggleSearch() {
-      const input = document.getElementById('searchInput');
-      input.style.display = input.style.display === 'none' ? 'block' : 'none';
-      if (input.style.display === 'block') input.focus();
+    function copyText(button) {
+      const text = button.previousElementSibling.textContent;
+      navigator.clipboard.writeText(text);
+      button.textContent = "Tersalin!";
+      setTimeout(() => button.textContent = "Salin", 1500);
     }
 
     function toggleDarkMode() {
-      document.body.classList.toggle('dark');
+      document.body.classList.toggle("dark-mode");
     }
 
-    function salinTemplate(teks) {
-      navigator.clipboard.writeText(teks).then(() => alert('Template disalin!'));
+    function toggleSearch() {
+      const bar = document.getElementById("searchBar");
+      bar.style.display = bar.style.display === "block" ? "none" : "block";
     }
 
-    function hapusTemplate(i) {
-      if (confirm('Hapus template ini?')) {
-        templates.splice(i, 1);
-        tampilkanTemplate();
-      }
-    }
-
-    function tampilkanTemplate() {
-      const kw = (document.getElementById('searchInput')?.value || "").toLowerCase();
-      const list = document.getElementById('daftarTemplate');
-      list.innerHTML = '';
-
-      if (!templates.length) {
-        list.innerHTML = '<p>Tidak ada template tersimpan.</p>';
-        return;
-      }
-
-      templates.forEach((t, i) => {
-        if (t.judul.toLowerCase().includes(kw) || t.isi.toLowerCase().includes(kw)) {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'template';
-
-          const content = document.createElement('div');
-          content.className = 'template-content';
-          content.innerHTML = `<strong>${t.judul}</strong><p>${t.isi}</p>`;
-
-          const btns = document.createElement('div');
-          btns.className = 'template-buttons';
-
-          const copyBtn = document.createElement('button');
-          copyBtn.textContent = 'Salin';
-          copyBtn.onclick = () => salinTemplate(t.isi);
-
-          const delBtn = document.createElement('button');
-          delBtn.textContent = 'Hapus';
-          delBtn.onclick = () => hapusTemplate(i);
-
-          btns.append(copyBtn, delBtn);
-          wrapper.append(content, btns);
-          list.appendChild(wrapper);
-        }
+    function searchTemplates() {
+      const filter = document.getElementById("searchBar").value.toLowerCase();
+      const templates = document.querySelectorAll("#templateList .template");
+      templates.forEach(template => {
+        const text = template.querySelector("p").textContent.toLowerCase();
+        template.style.display = text.includes(filter) ? "flex" : "none";
       });
     }
-
-    tampilkanTemplate();
   </script>
 </body>
-
 </html>
