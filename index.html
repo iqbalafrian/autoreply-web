@@ -84,19 +84,41 @@
       flex-wrap: wrap;
     }
 
-    .top-bar input {
-      max-width: 250px;
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: inherit;
+      padding: 10px;
     }
 
-    .top-bar button {
-      padding: 8px 14px;
+    #searchContainer {
+      display: none;
+      margin-top: 10px;
+      max-width: 300px;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      #searchContainer {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="top-bar">
+    <button class="icon-btn" onclick="toggleSearch()">👤</button>
+    <button class="icon-btn" onclick="toggleDarkMode()">🌓</button>
+  </div>
+
+  <div id="searchContainer">
     <input type="text" id="cari" placeholder="Cari template..." oninput="tampilkanTemplate()"/>
-    <button onclick="toggleDarkMode()">🌓 Mode Gelap</button>
   </div>
 
   <h1>AutoReplyEditor</h1>
@@ -119,7 +141,6 @@
   <script>
     let templates = [];
 
-    // Load dari localStorage
     try {
       const stored = JSON.parse(localStorage.getItem("templates"));
       if (Array.isArray(stored)) {
@@ -160,7 +181,7 @@
     }
 
     function tampilkanTemplate() {
-      const keyword = (document.getElementById("cari").value || "").toLowerCase();
+      const keyword = (document.getElementById("cari")?.value || "").toLowerCase();
       const container = document.getElementById("daftarTemplate");
       container.innerHTML = "";
 
@@ -185,6 +206,15 @@
           `;
           container.appendChild(div);
         });
+    }
+
+    function toggleSearch() {
+      const searchContainer = document.getElementById("searchContainer");
+      if (searchContainer.style.display === "none" || searchContainer.style.display === "") {
+        searchContainer.style.display = "block";
+      } else {
+        searchContainer.style.display = "none";
+      }
     }
 
     function toggleDarkMode() {
