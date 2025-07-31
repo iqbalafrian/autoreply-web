@@ -236,11 +236,11 @@ function tampilkanTemplate() {
     // Tombol reorder
     const naikBtn = document.createElement("button");
     naikBtn.innerText = "🔼";
-    naikBtn.onclick = () => pindahAtas(t.index);
+   naikBtn.onclick = () => naikkanTemplate(t.index);
 
     const turunBtn = document.createElement("button");
     turunBtn.innerText = "🔽";
-    turunBtn.onclick = () => pindahBawah(t.index);
+  turunBtn.onclick = () => turunkanTemplate(t.index);
 
     const tombolUrutan = document.createElement("div");
     tombolUrutan.style.display = "flex";
