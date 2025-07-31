@@ -114,6 +114,21 @@
   border: none;
   cursor: pointer;
 }
+    .template-card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease-in-out;
+}
+
+.template-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.template-card.remove {
+  opacity: 0;
+  transform: translateX(40px);
+}
   </style>
 </head>
 <body>
@@ -181,7 +196,7 @@
     tampilkanTemplate();
   }
 
- function tampilkanTemplate() {
+function tampilkanTemplate() {
   const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
   const container = document.getElementById("daftarTemplate");
   container.innerHTML = "";
@@ -219,7 +234,6 @@
     const editBtn = document.createElement("button");
     editBtn.innerText = "Edit";
     editBtn.onclick = () => {
-      // Ganti judul dan isi menjadi input yang bisa diedit
       const editJudul = document.createElement("input");
       editJudul.value = t.judul;
       editJudul.style.marginTop = "5px";
@@ -245,7 +259,6 @@
         tampilkanTemplate();
       };
 
-      // Bersihkan div dan masukkan editor
       div.innerHTML = "";
       div.appendChild(editJudul);
       div.appendChild(editIsi);
@@ -261,24 +274,27 @@
     div.appendChild(flexBox);
 
     container.appendChild(div);
-      function salinTemplate(teks) {
-    navigator.clipboard.writeText(teks).then(() => {
-      alert("Isi template telah disalin ke clipboard!");
-    }).catch(err => {
-      alert("Gagal menyalin: " + err);
-    });
-  }
-
-  function hapusTemplate(index) {
-    if (confirm("Yakin ingin menghapus template ini?")) {
-      templates.splice(index, 1);
-      localStorage.setItem("templates", JSON.stringify(templates));
-      tampilkanTemplate();
-    }
-  }
-
   });
 }
+
+// ⬇️ Letakkan FUNGSI di luar tampilkanTemplate()
+
+function salinTemplate(teks) {
+  navigator.clipboard.writeText(teks).then(() => {
+    alert("Isi template telah disalin ke clipboard!");
+  }).catch(err => {
+    alert("Gagal menyalin: " + err);
+  });
+}
+
+function hapusTemplate(index) {
+  if (confirm("Yakin ingin menghapus template ini?")) {
+    templates.splice(index, 1);
+    localStorage.setItem("templates", JSON.stringify(templates));
+    tampilkanTemplate();
+  }
+}
+
 
   function escapeHtml(text) {
     const map = {
