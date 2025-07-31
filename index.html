@@ -212,7 +212,8 @@ function tampilkanTemplate() {
 
   hasil.forEach(t => {
     const div = document.createElement("div");
-    div.className = "template";
+div.className = "template template-card";
+setTimeout(() => div.classList.add("show"), 10);
 
     const judulEl = document.createElement("strong");
     judulEl.innerText = t.judul;
@@ -288,13 +289,17 @@ function salinTemplate(teks) {
 }
 
 function hapusTemplate(index) {
+  const container = document.getElementById("daftarTemplate");
+  const item = container.children[index];
   if (confirm("Yakin ingin menghapus template ini?")) {
-    templates.splice(index, 1);
-    localStorage.setItem("templates", JSON.stringify(templates));
-    tampilkanTemplate();
+    item.classList.add("remove"); // animasi keluar
+    setTimeout(() => {
+      templates.splice(index, 1);
+      localStorage.setItem("templates", JSON.stringify(templates));
+      tampilkanTemplate();
+    }, 400);
   }
 }
-
 
   function escapeHtml(text) {
     const map = {
