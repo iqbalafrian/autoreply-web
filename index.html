@@ -175,33 +175,50 @@
   }
 
   function tampilkanTemplate() {
-    const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
-    const container = document.getElementById("daftarTemplate");
-    container.innerHTML = "";
+  const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
+  const container = document.getElementById("daftarTemplate");
+  container.innerHTML = "";
 
-    const hasil = templates
-      .map((t, i) => ({ ...t, index: i }))
-      .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)));
+  const hasil = templates
+    .map((t, i) => ({ ...t, index: i }))
+    .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)));
 
-    if (hasil.length === 0) {
-      container.innerHTML = "<p>Tidak ada template ditemukan.</p>";
-      return;
-    }
-
-    hasil.forEach(t => {
-      const div = document.createElement("div");
-      div.className = "template";
-      div.innerHTML = `
-        <strong>${escapeHtml(t.judul)}</strong>
-        <p>${escapeHtml(t.isi)}</p>
-        <div class="flex">
-          <button onclick="salinTemplate(${JSON.stringify(t.isi)})">Salin</button>
-          <button onclick="hapusTemplate(${t.index})">Hapus</button>
-        </div>
-      `;
-      container.appendChild(div);
-    });
+  if (hasil.length === 0) {
+    container.innerHTML = "<p>Tidak ada template ditemukan.</p>";
+    return;
   }
+
+  hasil.forEach(t => {
+    const div = document.createElement("div");
+    div.className = "template";
+
+    const judulEl = document.createElement("strong");
+    judulEl.innerText = t.judul;
+
+    const isiEl = document.createElement("p");
+    isiEl.innerText = t.isi;
+
+    const flexBox = document.createElement("div");
+    flexBox.className = "flex";
+
+    const salinBtn = document.createElement("button");
+    salinBtn.innerText = "Salin";
+    salinBtn.onclick = () => salinTemplate(t.isi);
+
+    const hapusBtn = document.createElement("button");
+    hapusBtn.innerText = "Hapus";
+    hapusBtn.onclick = () => hapusTemplate(t.index);
+
+    flexBox.appendChild(salinBtn);
+    flexBox.appendChild(hapusBtn);
+
+    div.appendChild(judulEl);
+    div.appendChild(isiEl);
+    div.appendChild(flexBox);
+
+    container.appendChild(div);
+  });
+}
 
   function escapeHtml(text) {
     const map = {
