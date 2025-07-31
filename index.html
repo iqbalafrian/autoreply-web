@@ -261,6 +261,22 @@
     div.appendChild(flexBox);
 
     container.appendChild(div);
+      function salinTemplate(teks) {
+    navigator.clipboard.writeText(teks).then(() => {
+      alert("Isi template telah disalin ke clipboard!");
+    }).catch(err => {
+      alert("Gagal menyalin: " + err);
+    });
+  }
+
+  function hapusTemplate(index) {
+    if (confirm("Yakin ingin menghapus template ini?")) {
+      templates.splice(index, 1);
+      localStorage.setItem("templates", JSON.stringify(templates));
+      tampilkanTemplate();
+    }
+  }
+
   });
 }
 
