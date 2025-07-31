@@ -158,7 +158,7 @@
     tampilkanTemplate();
   }
 
- function tampilkanTemplate() {
+function tampilkanTemplate() {
   const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
   const container = document.getElementById("daftarTemplate");
   container.innerHTML = "";
@@ -172,73 +172,132 @@
     return;
   }
 
-  hasil.forEach(t => {
+  hasil.forEach((t, i) => {
     const div = document.createElement("div");
     div.className = "template";
+    div.style.padding = "8px";
+    div.style.display = "flex";
+    div.style.alignItems = "flex-start";
+    div.style.justifyContent = "space-between";
 
-    const judulEl = document.createElement("strong");
+    const infoBox = document.createElement("div");
+    infoBox.style.flex = "1";
+    infoBox.style.minWidth = "0";
+
+    const judulEl = document.createElement("div");
     judulEl.innerText = t.judul;
+    judulEl.style.fontWeight = "bold";
+    judulEl.style.fontSize = "14px";
+    judulEl.style.whiteSpace = "nowrap";
+    judulEl.style.overflow = "hidden";
+    judulEl.style.textOverflow = "ellipsis";
 
-    const isiEl = document.createElement("p");
+    const isiEl = document.createElement("div");
     isiEl.innerText = t.isi;
+    isiEl.style.fontSize = "12px";
+    isiEl.style.color = "#555";
+    isiEl.style.whiteSpace = "nowrap";
+    isiEl.style.overflow = "hidden";
+    isiEl.style.textOverflow = "ellipsis";
 
-    const flexBox = document.createElement("div");
-    flexBox.className = "flex";
+    infoBox.appendChild(judulEl);
+    infoBox.appendChild(isiEl);
+
+    const btnBox = document.createElement("div");
+    btnBox.style.display = "flex";
+    btnBox.style.flexDirection = "column";
+    btnBox.style.gap = "4px";
+    btnBox.style.marginLeft = "10px";
 
     const salinBtn = document.createElement("button");
     salinBtn.innerText = "Salin";
+    salinBtn.style.fontSize = "12px";
     salinBtn.onclick = () => salinTemplate(t.isi);
-
-    const hapusBtn = document.createElement("button");
-    hapusBtn.innerText = "Hapus";
-    hapusBtn.onclick = () => hapusTemplate(t.index);
 
     const editBtn = document.createElement("button");
     editBtn.innerText = "Edit";
-    editBtn.onclick = () => {
-      // Ganti judul dan isi menjadi input yang bisa diedit
-      const editJudul = document.createElement("input");
-      editJudul.value = t.judul;
-      editJudul.style.marginTop = "5px";
+    editBtn.style.fontSize = "12px";
+    editBtn.onclick = () => editTemplate(t.index, div);
 
-      const editIsi = document.createElement("textarea");
-      editIsi.value = t.isi;
-      editIsi.rows = 3;
-      editIsi.style.marginTop = "5px";
+    const hapusBtn = document.createElement("button");
+    hapusBtn.innerText = "Hapus";
+    hapusBtn.style.fontSize = "12px";
+    hapusBtn.onclick = () => hapusTemplate(t.index);
 
-      const simpanEditBtn = document.createElement("button");
-      simpanEditBtn.innerText = "Simpan";
-      simpanEditBtn.onclick = () => {
-        const newJudul = editJudul.value.trim();
-        const newIsi = editIsi.value.trim();
-
-        if (!newJudul || !newIsi) {
-          alert("Judul dan isi tidak boleh kosong.");
-          return;
-        }
-
-        templates[t.index] = { judul: newJudul, isi: newIsi };
+    const naikBtn = document.createElement("button");
+    naikBtn.innerText = "⬆️";
+    naikBtn.style.fontSize = "12px";
+    naikBtn.onclick = () => {
+      if (t.index > 0) {
+        const temp = templates[t.index];
+        templates[t.index] = templates[t.index - 1];
+        templates[t.index - 1] = temp;
         localStorage.setItem("templates", JSON.stringify(templates));
         tampilkanTemplate();
-      };
-
-      // Bersihkan div dan masukkan editor
-      div.innerHTML = "";
-      div.appendChild(editJudul);
-      div.appendChild(editIsi);
-      div.appendChild(simpanEditBtn);
+      }
     };
 
-    flexBox.appendChild(salinBtn);
-    flexBox.appendChild(editBtn);
-    flexBox.appendChild(hapusBtn);
+    const turunBtn = document.createElement("button");
+    turunBtn.innerText = "⬇️";
+    turunBtn.style.fontSize = "12px";
+    turunBtn.onclick = () => {
+      if (t.index < templates.length - 1) {
+        const temp = templates[t.index];
+        templates[t.index] = templates[t.index + 1];
+        templates[t.index + 1] = temp;
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
+      }
+    };
 
-    div.appendChild(judulEl);
-    div.appendChild(isiEl);
-    div.appendChild(flexBox);
+    [salinBtn, editBtn, hapusBtn, naikBtn, turunBtn].forEach(btn => {
+      btn.style.padding = "4px 6px";
+    });
 
+    btnBox.appendChild(salinBtn);
+    btnBox.appendChild(editBtn);
+    btnBox.appendChild(hapusBtn);
+    btnBox.appendChild(naikBtn);
+    btnBox.appendChild(turunBtn);
+
+    div.appendChild(infoBox);
+    div.appendChild(btnBox);
     container.appendChild(div);
   });
+}
+
+  function editTemplate(index, container) {
+  const template = templates[index];
+
+  const inputJudul = document.createElement("input");
+  inputJudul.value = template.judul;
+  inputJudul.style.margin = "4px 0";
+
+  const inputIsi = document.createElement("textarea");
+  inputIsi.value = template.isi;
+  inputIsi.rows = 3;
+  inputIsi.style.margin = "4px 0";
+
+  const simpanBtn = document.createElement("button");
+  simpanBtn.innerText = "Simpan";
+  simpanBtn.onclick = () => {
+    const newJudul = inputJudul.value.trim();
+    const newIsi = inputIsi.value.trim();
+
+    if (!newJudul || !newIsi) {
+      alert("Judul dan isi tidak boleh kosong.");
+      return;
+    }
+
+    templates[index] = { judul: newJudul, isi: newIsi };
+    localStorage.setItem("templates", JSON.stringify(templates));
+    tampilkanTemplate();
+  };
+
+  container.innerHTML = "";
+  container.appendChild(inputJudul);
+  container.appendChild(inputIsi);
+  container.appendChild(simpanBtn);
 }
 
   function escapeHtml(text) {
