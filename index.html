@@ -91,18 +91,6 @@
       background-color: #2a2a2a;
       color: #f0f4ff;
     }
-    .template button {
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  white-space: nowrap;
-  background-color: #007bff;
-  color: white;
-  border: none;
-}
-.template button:hover {
-  background-color: #0056b3;
-}
   </style>
 </head>
 <body>
@@ -170,7 +158,7 @@
     tampilkanTemplate();
   }
 
-function tampilkanTemplate() {
+ function tampilkanTemplate() {
   const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
   const container = document.getElementById("daftarTemplate");
   container.innerHTML = "";
@@ -187,128 +175,70 @@ function tampilkanTemplate() {
   hasil.forEach(t => {
     const div = document.createElement("div");
     div.className = "template";
-    div.style.border = "1px solid #ccc";
-    div.style.borderRadius = "10px";
-    div.style.marginBottom = "10px";
-    div.style.padding = "10px";
-    div.style.display = "flex";
-    div.style.flexDirection = "row";
-    div.style.justifyContent = "space-between";
-    div.style.alignItems = "flex-start";
 
-    // Kiri: Judul + isi + tombol aksi (horizontal)
-    const kontenKiri = document.createElement("div");
-    kontenKiri.style.flex = "1";
-    kontenKiri.style.paddingRight = "10px";
+    const judulEl = document.createElement("strong");
+    judulEl.innerText = t.judul;
 
-    const judulEl = document.createElement("div");
-    judulEl.innerHTML = `<strong>${t.judul}</strong>`;
-    judulEl.style.marginBottom = "4px";
-
-    const isiEl = document.createElement("div");
+    const isiEl = document.createElement("p");
     isiEl.innerText = t.isi;
-    isiEl.style.maxHeight = "6em"; // ~5 baris
-    isiEl.style.overflow = "hidden";
-    isiEl.style.textOverflow = "ellipsis";
-    isiEl.style.display = "-webkit-box";
-    isiEl.style.webkitLineClamp = "5";
-    isiEl.style.webkitBoxOrient = "vertical";
-    isiEl.style.whiteSpace = "normal";
-    isiEl.style.marginBottom = "6px";
 
-    const tombolAksi = document.createElement("div");
-    tombolAksi.style.display = "flex";
-    tombolAksi.style.gap = "8px";
+    const flexBox = document.createElement("div");
+    flexBox.className = "flex";
 
     const salinBtn = document.createElement("button");
     salinBtn.innerText = "Salin";
     salinBtn.onclick = () => salinTemplate(t.isi);
 
-    const editBtn = document.createElement("button");
-    editBtn.innerText = "Edit";
-    editBtn.onclick = () => mulaiEdit(t.index);
-
     const hapusBtn = document.createElement("button");
     hapusBtn.innerText = "Hapus";
     hapusBtn.onclick = () => hapusTemplate(t.index);
 
-    tombolAksi.appendChild(salinBtn);
-    tombolAksi.appendChild(editBtn);
-    tombolAksi.appendChild(hapusBtn);
+    const editBtn = document.createElement("button");
+    editBtn.innerText = "Edit";
+    editBtn.onclick = () => {
+      // Ganti judul dan isi menjadi input yang bisa diedit
+      const editJudul = document.createElement("input");
+      editJudul.value = t.judul;
+      editJudul.style.marginTop = "5px";
 
-    kontenKiri.appendChild(judulEl);
-    kontenKiri.appendChild(isiEl);
-    kontenKiri.appendChild(tombolAksi);
+      const editIsi = document.createElement("textarea");
+      editIsi.value = t.isi;
+      editIsi.rows = 3;
+      editIsi.style.marginTop = "5px";
 
-    // Kanan: Tombol reorder (naik/turun)
-    const kontenKanan = document.createElement("div");
-    kontenKanan.style.display = "flex";
-    kontenKanan.style.flexDirection = "column";
-    kontenKanan.style.alignItems = "flex-end";
-    kontenKanan.style.gap = "4px";
+      const simpanEditBtn = document.createElement("button");
+      simpanEditBtn.innerText = "Simpan";
+      simpanEditBtn.onclick = () => {
+        const newJudul = editJudul.value.trim();
+        const newIsi = editIsi.value.trim();
 
-    const naikBtn = document.createElement("button");
-    naikBtn.innerText = "🔼";
-    naikBtn.onclick = () => naikkanTemplate(t.index);
+        if (!newJudul || !newIsi) {
+          alert("Judul dan isi tidak boleh kosong.");
+          return;
+        }
 
-    const turunBtn = document.createElement("button");
-    turunBtn.innerText = "🔽";
-    turunBtn.onclick = () => turunkanTemplate(t.index);
+        templates[t.index] = { judul: newJudul, isi: newIsi };
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
+      };
 
-    kontenKanan.appendChild(naikBtn);
-    kontenKanan.appendChild(turunBtn);
+      // Bersihkan div dan masukkan editor
+      div.innerHTML = "";
+      div.appendChild(editJudul);
+      div.appendChild(editIsi);
+      div.appendChild(simpanEditBtn);
+    };
 
-    div.appendChild(kontenKiri);
-    div.appendChild(kontenKanan);
+    flexBox.appendChild(salinBtn);
+    flexBox.appendChild(editBtn);
+    flexBox.appendChild(hapusBtn);
+
+    div.appendChild(judulEl);
+    div.appendChild(isiEl);
+    div.appendChild(flexBox);
+
     container.appendChild(div);
   });
-
-  function naikkanTemplate(index) {
-  if (index === 0) return;
-  [templates[index - 1], templates[index]] = [templates[index], templates[index - 1]];
-  localStorage.setItem("templates", JSON.stringify(templates));
-  tampilkanTemplate();
-}
-
-function turunkanTemplate(index) {
-  if (index === templates.length - 1) return;
-  [templates[index], templates[index + 1]] = [templates[index + 1], templates[index]];
-  localStorage.setItem("templates", JSON.stringify(templates));
-  tampilkanTemplate();
-}
-
-  function editTemplate(index, container) {
-  const template = templates[index];
-
-  const inputJudul = document.createElement("input");
-  inputJudul.value = template.judul;
-  inputJudul.style.margin = "4px 0";
-
-  const inputIsi = document.createElement("textarea");
-  inputIsi.value = template.isi;
-  inputIsi.rows = 3;
-  inputIsi.style.margin = "4px 0";
-
-  const simpanBtn = document.createElement("button");
-  simpanBtn.innerText = "Simpan";
-  simpanBtn.onclick = () => {
-    const newJudul = inputJudul.value.trim();
-    const newIsi = inputIsi.value.trim();
-
-    if (!newJudul || !newIsi) {
-      alert("Judul dan isi tidak boleh kosong.");
-      return;
-    }
-
-    templates[index] = { judul: newJudul, isi: newIsi };
-    localStorage.setItem("templates", JSON.stringify(templates));
-    tampilkanTemplate();
-  };
-
-  container.innerHTML = "";
-  container.appendChild(inputJudul);
-  container.appendChild(inputIsi);
-  container.appendChild(simpanBtn);
 }
 
   function escapeHtml(text) {
