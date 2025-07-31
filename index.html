@@ -122,89 +122,111 @@
     <div id="daftarTemplate"></div>
   </div>
 
-  <script>
-    let templates = [];
+<script>
+  let templates = [];
 
-    try {
-      const stored = JSON.parse(localStorage.getItem("templates"));
-      if (Array.isArray(stored)) {
-        templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
-      }
-    } catch (e) {
-      localStorage.removeItem("templates");
+  try {
+    const stored = JSON.parse(localStorage.getItem("templates"));
+    if (Array.isArray(stored)) {
+      templates = stored.filter(t => typeof t === 'object' && t.judul && t.isi);
+    }
+  } catch (e) {
+    localStorage.removeItem("templates");
+  }
+
+  function simpanTemplate() {
+    const judulInput = document.getElementById("judul");
+    const isiInput = document.getElementById("isi");
+    const judul = judulInput.value.trim();
+    const isi = isiInput.value.trim();
+
+    if (!judul || !isi) {
+      alert("Judul dan isi harus diisi.");
+      return;
     }
 
-    function simpanTemplate() {
-      const judul = document.getElementById("judul").value.trim();
-      const isi = document.getElementById("isi").value.trim();
+    if (templates.some(t => t.judul.toLowerCase() === judul.toLowerCase())) {
+      alert("Template dengan judul yang sama sudah ada.");
+      return;
+    }
 
-      if (!judul || !isi) {
-        alert("Judul dan isi harus diisi.");
-        return;
-      }
+    templates.unshift({ judul, isi });
+    localStorage.setItem("templates", JSON.stringify(templates));
+    judulInput.value = "";
+    isiInput.value = "";
+    judulInput.focus();
+    tampilkanTemplate();
+  }
 
-      templates.unshift({ judul, isi });
+  function hapusTemplate(index) {
+    if (confirm("Yakin ingin menghapus template ini?")) {
+      templates.splice(index, 1);
       localStorage.setItem("templates", JSON.stringify(templates));
-      document.getElementById("judul").value = "";
-      document.getElementById("isi").value = "";
       tampilkanTemplate();
     }
+  }
 
-    function hapusTemplate(index) {
-      if (confirm("Yakin ingin menghapus template ini?")) {
-        templates.splice(index, 1);
-        localStorage.setItem("templates", JSON.stringify(templates));
-        tampilkanTemplate();
-      }
+  function salinTemplate(isi) {
+    navigator.clipboard.writeText(isi).then(() => {
+      alert("Template disalin ke clipboard.");
+    }).catch(() => {
+      alert("Gagal menyalin teks.");
+    });
+  }
+
+  function tampilkanTemplate() {
+    const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
+    const container = document.getElementById("daftarTemplate");
+    container.innerHTML = "";
+
+    const hasil = templates
+      .map((t, i) => ({ ...t, index: i }))
+      .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)));
+
+    if (hasil.length === 0) {
+      container.innerHTML = "<p>Tidak ada template ditemukan.</p>";
+      return;
     }
 
-    function salinTemplate(isi) {
-      navigator.clipboard.writeText(isi);
+    hasil.forEach(t => {
+      const div = document.createElement("div");
+      div.className = "template";
+      div.innerHTML = `
+        <strong>${escapeHtml(t.judul)}</strong>
+        <p>${escapeHtml(t.isi)}</p>
+        <div class="flex">
+          <button onclick="salinTemplate(${JSON.stringify(t.isi)})">Salin</button>
+          <button onclick="hapusTemplate(${t.index})">Hapus</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
+
+  function toggleSearch() {
+    const input = document.getElementById("searchInput");
+    input.style.display = input.style.display === "none" || input.style.display === "" ? "inline-block" : "none";
+    if (input.style.display === "inline-block") {
+      input.focus();
     }
+  }
 
-    function tampilkanTemplate() {
-      const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
-      const container = document.getElementById("daftarTemplate");
-      container.innerHTML = "";
+  function toggleDarkMode() {
+    const body = document.body;
+    const isDark = body.getAttribute("data-theme") === "dark";
+    body.setAttribute("data-theme", isDark ? "light" : "dark");
+  }
 
-      if (!Array.isArray(templates) || templates.length === 0) {
-        container.innerHTML = "<p>Tidak ada template tersimpan.</p>";
-        return;
-      }
-
-      templates
-        .map((t, i) => ({ ...t, index: i }))
-        .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)))
-        .forEach(t => {
-          const div = document.createElement("div");
-          div.className = "template";
-          div.innerHTML = `
-            <strong>${t.judul}</strong>
-            <p>${t.isi}</p>
-            <div class="flex">
-              <button onclick="salinTemplate(\`${t.isi.replace(/`/g, "\\`")}\`)">Salin</button>
-              <button onclick="hapusTemplate(${t.index})">Hapus</button>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-    }
-
-    function toggleSearch() {
-      const input = document.getElementById("searchInput");
-      input.style.display = input.style.display === "none" || input.style.display === "" ? "inline-block" : "none";
-      if (input.style.display === "inline-block") {
-        input.focus();
-      }
-    }
-
-    function toggleDarkMode() {
-      const body = document.body;
-      const isDark = body.getAttribute("data-theme") === "dark";
-      body.setAttribute("data-theme", isDark ? "light" : "dark");
-    }
-
-    tampilkanTemplate();
-  </script>
-</body>
-</html>
+  tampilkanTemplate();
+</script>
