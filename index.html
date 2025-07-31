@@ -91,6 +91,18 @@
       background-color: #2a2a2a;
       color: #f0f4ff;
     }
+    .template button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  white-space: nowrap;
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+.template button:hover {
+  background-color: #0056b3;
+}
   </style>
 </head>
 <body>
@@ -184,7 +196,7 @@ function tampilkanTemplate() {
     div.style.justifyContent = "space-between";
     div.style.alignItems = "flex-start";
 
-    // Kiri: Judul dan isi template (max 5 baris)
+    // Kiri: Judul + isi + tombol aksi (horizontal)
     const kontenKiri = document.createElement("div");
     kontenKiri.style.flex = "1";
     kontenKiri.style.paddingRight = "10px";
@@ -195,25 +207,19 @@ function tampilkanTemplate() {
 
     const isiEl = document.createElement("div");
     isiEl.innerText = t.isi;
-    isiEl.style.maxHeight = "6em"; // 5-6 baris
+    isiEl.style.maxHeight = "6em"; // ~5 baris
     isiEl.style.overflow = "hidden";
     isiEl.style.textOverflow = "ellipsis";
     isiEl.style.display = "-webkit-box";
     isiEl.style.webkitLineClamp = "5";
     isiEl.style.webkitBoxOrient = "vertical";
     isiEl.style.whiteSpace = "normal";
+    isiEl.style.marginBottom = "6px";
 
-    kontenKiri.appendChild(judulEl);
-    kontenKiri.appendChild(isiEl);
+    const tombolAksi = document.createElement("div");
+    tombolAksi.style.display = "flex";
+    tombolAksi.style.gap = "8px";
 
-    // Kanan: Tombol
-    const kontenKanan = document.createElement("div");
-    kontenKanan.style.display = "flex";
-    kontenKanan.style.flexDirection = "column";
-    kontenKanan.style.alignItems = "flex-end";
-    kontenKanan.style.gap = "4px";
-
-    // Tombol aksi utama
     const salinBtn = document.createElement("button");
     salinBtn.innerText = "Salin";
     salinBtn.onclick = () => salinTemplate(t.isi);
@@ -226,37 +232,37 @@ function tampilkanTemplate() {
     hapusBtn.innerText = "Hapus";
     hapusBtn.onclick = () => hapusTemplate(t.index);
 
-    const tombolAksi = document.createElement("div");
-    tombolAksi.style.display = "flex";
-    tombolAksi.style.flexDirection = "column";
     tombolAksi.appendChild(salinBtn);
     tombolAksi.appendChild(editBtn);
     tombolAksi.appendChild(hapusBtn);
 
-    // Tombol reorder
+    kontenKiri.appendChild(judulEl);
+    kontenKiri.appendChild(isiEl);
+    kontenKiri.appendChild(tombolAksi);
+
+    // Kanan: Tombol reorder (naik/turun)
+    const kontenKanan = document.createElement("div");
+    kontenKanan.style.display = "flex";
+    kontenKanan.style.flexDirection = "column";
+    kontenKanan.style.alignItems = "flex-end";
+    kontenKanan.style.gap = "4px";
+
     const naikBtn = document.createElement("button");
     naikBtn.innerText = "🔼";
-   naikBtn.onclick = () => naikkanTemplate(t.index);
+    naikBtn.onclick = () => naikkanTemplate(t.index);
 
     const turunBtn = document.createElement("button");
     turunBtn.innerText = "🔽";
-  turunBtn.onclick = () => turunkanTemplate(t.index);
+    turunBtn.onclick = () => turunkanTemplate(t.index);
 
-    const tombolUrutan = document.createElement("div");
-    tombolUrutan.style.display = "flex";
-    tombolUrutan.style.flexDirection = "column";
-    tombolUrutan.style.marginTop = "6px";
-    tombolUrutan.appendChild(naikBtn);
-    tombolUrutan.appendChild(turunBtn);
-
-    kontenKanan.appendChild(tombolAksi);
-    kontenKanan.appendChild(tombolUrutan);
+    kontenKanan.appendChild(naikBtn);
+    kontenKanan.appendChild(turunBtn);
 
     div.appendChild(kontenKiri);
     div.appendChild(kontenKanan);
     container.appendChild(div);
   });
-}
+
   function naikkanTemplate(index) {
   if (index === 0) return;
   [templates[index - 1], templates[index]] = [templates[index], templates[index - 1]];
