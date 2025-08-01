@@ -222,127 +222,91 @@ function tampilkanTemplate() {
   }
 
   hasil.forEach(t => {
-  const div = document.createElement("div");
-  div.className = "template template-card";
-  setTimeout(() => div.classList.add("show"), 10);
+    const div = document.createElement("div");
+    div.className = "template template-card";
+    setTimeout(() => div.classList.add("show"), 10);
 
-  const judulEl = document.createElement("strong");
-  judulEl.innerText = t.judul;
+    const judulEl = document.createElement("strong");
+    judulEl.innerText = t.judul;
 
-  const isiEl = document.createElement("p");
-  isiEl.innerText = t.isi;
+    const isiEl = document.createElement("p");
+    isiEl.innerText = t.isi;
 
-  const flexBox = document.createElement("div");
-  flexBox.className = "template-buttons";
+    const flexBox = document.createElement("div");
+    flexBox.className = "template-buttons";
 
-  const salinBtn = document.createElement("button");
-  salinBtn.innerText = "Salin";
-  salinBtn.onclick = () => salinTemplate(t.isi);
+    const salinBtn = document.createElement("button");
+    salinBtn.innerText = "Salin";
+    salinBtn.onclick = () => salinTemplate(t.isi);
 
- editBtn.onclick = () => {
-  div.innerHTML = ""; // Masuk mode edit
+    const editBtn = document.createElement("button");
+    editBtn.innerText = "Edit";
+    editBtn.onclick = () => {
+      div.innerHTML = "";
 
-  const inputJudul = document.createElement("input");
-  inputJudul.value = item.judul;
-  inputJudul.placeholder = "Judul Template";
+      const inputJudul = document.createElement("input");
+      inputJudul.value = t.judul;
+      inputJudul.placeholder = "Judul Template";
 
-  const inputIsi = document.createElement("textarea");
-  inputIsi.value = item.isi;
-  inputIsi.placeholder = "Isi Template";
+      const inputIsi = document.createElement("textarea");
+      inputIsi.value = t.isi;
+      inputIsi.placeholder = "Isi Template";
 
-  const simpanBtn = document.createElement("button");
-  simpanBtn.textContent = "Simpan Perubahan";
+      const simpanBtn = document.createElement("button");
+      simpanBtn.textContent = "Simpan Perubahan";
 
-  const batalBtn = document.createElement("button");
-  batalBtn.textContent = "Batal";
+      const batalBtn = document.createElement("button");
+      batalBtn.textContent = "Batal";
 
-  // ⬅️ Buat div wrapper horizontal
-  const editFlex = document.createElement("div");
-  editFlex.className = "template-buttons";
-  editFlex.appendChild(simpanBtn);
-  editFlex.appendChild(batalBtn);
+      const tombolEditFlex = document.createElement("div");
+      tombolEditFlex.className = "template-buttons";
+      tombolEditFlex.appendChild(simpanBtn);
+      tombolEditFlex.appendChild(batalBtn);
 
-  div.appendChild(inputJudul);
-  div.appendChild(inputIsi);
-  div.appendChild(editFlex);
+      div.appendChild(inputJudul);
+      div.appendChild(inputIsi);
+      div.appendChild(tombolEditFlex);
 
-  simpanBtn.onclick = () => {
-    const newJudul = inputJudul.value.trim();
-    const newIsi = inputIsi.value.trim();
+      simpanBtn.onclick = () => {
+        const newJudul = inputJudul.value.trim();
+        const newIsi = inputIsi.value.trim();
 
-    if (!newJudul || !newIsi) {
-      alert("Judul dan isi tidak boleh kosong.");
-      return;
-    }
+        if (!newJudul || !newIsi) {
+          alert("Judul dan isi tidak boleh kosong.");
+          return;
+        }
 
-    const semuaTemplate = JSON.parse(localStorage.getItem("templateAutoReply")) || [];
-    const judulDuplikat = semuaTemplate.find(
-      (t) => t.judul.toLowerCase() === newJudul.toLowerCase() && t !== item
-    );
-    if (judulDuplikat) {
-      alert("Judul template sudah digunakan.");
-      return;
-    }
+        const judulDuplikat = templates.some((tpl, i) =>
+          i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
+        );
+        if (judulDuplikat) {
+          alert("Judul template sudah digunakan.");
+          return;
+        }
 
-    item.judul = newJudul;
-    item.isi = newIsi;
-    localStorage.setItem("templateAutoReply", JSON.stringify(semuaTemplate));
-    tampilkanTemplate();
-  };
+        templates[t.index] = { judul: newJudul, isi: newIsi };
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
+      };
 
-  batalBtn.onclick = () => tampilkanTemplate();
-};
-
-    const simpanEditBtn = document.createElement("button");
-    simpanEditBtn.innerText = "Simpan Perubahan";
-
-    simpanEditBtn.onclick = () => {
-      const newJudul = editJudul.value.trim();
-      const newIsi = editIsi.value.trim();
-
-      if (!newJudul || !newIsi) {
-        alert("Judul dan isi tidak boleh kosong.");
-        return;
-      }
-
-      const judulSudahAda = templates.some((tpl, i) =>
-        i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
-      );
-      if (judulSudahAda) {
-        alert("Judul template sudah digunakan.");
-        return;
-      }
-
-      templates[t.index] = { judul: newJudul, isi: newIsi };
-      localStorage.setItem("templates", JSON.stringify(templates));
-      tampilkanTemplate();
+      batalBtn.onclick = () => tampilkanTemplate();
     };
 
-    const batalBtn = document.createElement("button");
-batalBtn.innerText = "Batal";
-batalBtn.onclick = tampilkanTemplate;
+    const hapusBtn = document.createElement("button");
+    hapusBtn.innerText = "Hapus";
+    hapusBtn.onclick = () => hapusTemplate(t.index);
 
-div.appendChild(editJudul);
-div.appendChild(editIsi);
-div.appendChild(simpanEditBtn);
-div.appendChild(batalBtn); // << tambah di sini
+    flexBox.appendChild(salinBtn);
+    flexBox.appendChild(editBtn);
+    flexBox.appendChild(hapusBtn);
 
-  };
+    div.appendChild(judulEl);
+    div.appendChild(isiEl);
+    div.appendChild(flexBox);
 
-  const hapusBtn = document.createElement("button");
-  hapusBtn.innerText = "Hapus";
-  hapusBtn.onclick = () => hapusTemplate(t.index);
-
-  flexBox.appendChild(salinBtn);
-  flexBox.appendChild(editBtn);
-  flexBox.appendChild(hapusBtn);
-
-  div.appendChild(judulEl);
-  div.appendChild(isiEl);
-  div.appendChild(flexBox);
-
-  container.appendChild(div);
-});
+    container.appendChild(div);
+  });
+}
 
 function salinTemplate(teks) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
