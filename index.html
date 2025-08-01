@@ -255,7 +255,7 @@ function tampilkanTemplate() {
       editIsi.style.marginBottom = "10px";
 
       const simpanEditBtn = document.createElement("button");
-      simpanEditBtn.innerText = "Simpan Perubahan";
+      simpanEditBtn.innerText = "Simpan";
       simpanEditBtn.onclick = () => {
         if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
 
@@ -272,9 +272,9 @@ function tampilkanTemplate() {
       batalBtn.onclick = () => tampilkanTemplate();
 
       const tombolWrapper = document.createElement("div");
-      tombolWrapper.className = "template-buttons"; // CSS ini atur horizontal
       tombolWrapper.style.display = "flex";
       tombolWrapper.style.gap = "8px";
+      tombolWrapper.style.marginTop = "8px";
       tombolWrapper.appendChild(simpanEditBtn);
       tombolWrapper.appendChild(batalBtn);
 
@@ -294,16 +294,23 @@ function tampilkanTemplate() {
       }
     };
 
-    // Tambahkan ke DOM
+    // ✅ Buat grup tombol horizontal
+    const buttonGroup = document.createElement("div");
+    buttonGroup.style.display = "flex";
+    buttonGroup.style.gap = "6px";
+    buttonGroup.style.marginTop = "6px";
+    buttonGroup.appendChild(copyBtn);
+    buttonGroup.appendChild(editBtn);
+    buttonGroup.appendChild(hapusBtn);
+
     div.appendChild(judul);
     div.appendChild(isi);
-    div.appendChild(copyBtn);
-    div.appendChild(editBtn);
-    div.appendChild(hapusBtn);
+    div.appendChild(buttonGroup); // ✅ masukkan semua tombol ke dalam group
 
     daftar.appendChild(div);
   });
 }
+
 
 function salinTemplate(teks) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
