@@ -15,6 +15,9 @@
       color: #003366;
       padding: 20px;
     }
+    .template {
+  transition: all 0.3s ease;
+}
     input, textarea, select, button {
       padding: 10px;
       margin: 5px 0;
@@ -240,38 +243,48 @@ flexBox.className = "template-buttons";
     hapusBtn.innerText = "Hapus";
     hapusBtn.onclick = () => hapusTemplate(t.index);
 
-    const editBtn = document.createElement("button");
-    editBtn.innerText = "Edit";
-    editBtn.onclick = () => {
-      const editJudul = document.createElement("input");
-      editJudul.value = t.judul;
-      editJudul.style.marginTop = "5px";
+editBtn.onclick = () => {
+  div.innerHTML = ""; // Bersihkan isi div saat masuk mode edit
 
-      const editIsi = document.createElement("textarea");
-      editIsi.value = t.isi;
-      editIsi.rows = 3;
-      editIsi.style.marginTop = "5px";
+  const editJudul = document.createElement("input");
+  editJudul.type = "text";
+  editJudul.value = t.judul;
+  editJudul.style.marginTop = "5px";
 
-      const simpanEditBtn = document.createElement("button");
-simpanEditBtn.innerText = "Simpan";
-simpanEditBtn.style.marginTop = "10px";
+  const editIsi = document.createElement("textarea");
+  editIsi.value = t.isi;
+  editIsi.rows = 4;
+  editIsi.style.marginTop = "10px";
 
-  if (!newJudul || !newIsi) {
-    alert("Judul dan isi tidak boleh kosong.");
-    return;
-  }
+  const simpanEditBtn = document.createElement("button");
+  simpanEditBtn.innerText = "Simpan Perubahan";
+  simpanEditBtn.style.marginTop = "10px";
 
-  const judulSudahAda = templates.some((tpl, i) =>
-    i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
-  );
-  if (judulSudahAda) {
-    alert("Judul template sudah digunakan.");
-    return;
-  }
+  simpanEditBtn.onclick = () => {
+    const newJudul = editJudul.value.trim();
+    const newIsi = editIsi.value.trim();
 
-  templates[t.index] = { judul: newJudul, isi: newIsi };
-  localStorage.setItem("templates", JSON.stringify(templates));
-  tampilkanTemplate();
+    if (!newJudul || !newIsi) {
+      alert("Judul dan isi tidak boleh kosong.");
+      return;
+    }
+
+    const judulSudahAda = templates.some((tpl, i) =>
+      i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
+    );
+    if (judulSudahAda) {
+      alert("Judul template sudah digunakan.");
+      return;
+    }
+
+    templates[t.index] = { judul: newJudul, isi: newIsi };
+    localStorage.setItem("templates", JSON.stringify(templates));
+    tampilkanTemplate();
+  };
+
+  div.appendChild(editJudul);
+  div.appendChild(editIsi);
+  div.appendChild(simpanEditBtn);
 };
 
       div.innerHTML = "";
