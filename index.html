@@ -52,9 +52,13 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
 
-  .template-content {
-    max-width: 100%;
-  }
+ .template-content {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 4px 0;
+}
 
   .template-item strong {
     display: block;
@@ -74,11 +78,11 @@
   }
 
   .template-buttons {
-    display: flex;
-    justify-content: flex-start;
-    gap: 10px;
-    margin-top: 10px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
 
   .template-buttons button {
     padding: 6px 12px;
@@ -226,64 +230,64 @@ function tampilkanTemplate() {
   const query = document.getElementById("searchInput").value.toLowerCase();
   daftar.innerHTML = "";
 
-  const templates = JSON.parse(localStorage.getItem("templates") || "[]")
-    .map((t, i) => ({ ...t, index: i }))
-    .filter(t => t.judul.toLowerCase().includes(query) || t.isi.toLowerCase().includes(query));
+  templates
+    .filter(t => t.judul.toLowerCase().includes(query) || t.isi.toLowerCase().includes(query))
+    .forEach((t, index) => {
+      const container = document.createElement("div");
+      container.className = "template-item";
 
-  templates.forEach(t => {
-    const container = document.createElement("div");
-container.className = "template-item";
+      const judul = document.createElement("strong");
+      judul.innerText = t.judul;
 
-// Judul
-const judul = document.createElement("strong");
-judul.innerText = t.judul;
+      const isi = document.createElement("p");
+      isi.className = "template-content";
+      isi.innerText = t.isi;
 
-// Isi dengan ellipsis
-const isi = document.createElement("p");
-isi.className = "template-content"; // tambahkan class agar CSS ellipsis bekerja
-isi.innerText = t.isi;
+      // buat tombol di bawah isi
+      const tombolDiv = document.createElement("div");
+      tombolDiv.className = "template-buttons";
 
-// Tombol: Salin, Edit, Hapus
-const tombolDiv = document.createElement("div");
-tombolDiv.className = "template-buttons";
+      const salinBtn = document.createElement("button");
+      salinBtn.innerText = "Salin";
+      salinBtn.onclick = () => salinTemplate(t.isi);
 
-// Tombol Salin
-const salinBtn = document.createElement("button");
-salinBtn.innerText = "Salin";
-salinBtn.onclick = () => {
-  navigator.clipboard.writeText(t.isi).then(() => alert("Disalin!"));
-};
+      const editBtn = document.createElement("button");
+      editBtn.innerText = "Edit";
+      editBtn.onclick = () => {
+        const baru = prompt("Edit isi template:", t.isi);
+        if (baru !== null) {
+          templates[index].isi = baru;
+          localStorage.setItem("templates", JSON.stringify(templates));
+          tampilkanTemplate();
+        }
+      };
 
-// Tombol Edit
-const editBtn = document.createElement("button");
-editBtn.innerText = "Edit";
-// tambahkan fungsi edit sesuai kebutuhan
+      const hapusBtn = document.createElement("button");
+      hapusBtn.innerText = "Hapus";
+      hapusBtn.onclick = () => hapusTemplate(index);
 
-// Tombol Hapus
-const hapusBtn = document.createElement("button");
-hapusBtn.innerText = "Hapus";
-// tambahkan fungsi hapus sesuai kebutuhan
+      tombolDiv.appendChild(salinBtn);
+      tombolDiv.appendChild(editBtn);
+      tombolDiv.appendChild(hapusBtn);
 
-// Susun tombol ke dalam div tombol
-tombolDiv.appendChild(salinBtn);
-tombolDiv.appendChild(editBtn);
-tombolDiv.appendChild(hapusBtn);
+      container.appendChild(judul);
+      container.appendChild(isi);
+      container.appendChild(tombolDiv);
 
-// Susun ke dalam container (urutan penting!)
-container.appendChild(judul);
-container.appendChild(isi);        // isi dulu
-container.appendChild(tombolDiv); // tombol di bawah isi
+      daftar.appendChild(container);
+    });
+}
 
-templateList.appendChild(container);
 
 function salinTemplate(teks) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(teks)
-      .then(() => alert("Isi template telah disalin ke clipboard!"))
-      .catch(() => fallbackSalin(teks));
-  } else {
-    fallbackSalin(teks);
-  }
+  navigator.clipboard.writeText(teks).catch(() => {
+    const area = document.createElement("textarea");
+    area.value = teks;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    document.body.removeChild(area);
+  });
 }
 
 function fallbackSalin(teks) {
