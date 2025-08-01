@@ -239,18 +239,59 @@ function tampilkanTemplate() {
   salinBtn.innerText = "Salin";
   salinBtn.onclick = () => salinTemplate(t.isi);
 
-  const editBtn = document.createElement("button"); // ✅ fix
-  editBtn.innerText = "Edit";
-  editBtn.onclick = () => {
-    div.innerHTML = ""; // Masuk mode edit
+ editBtn.onclick = () => {
+  div.innerHTML = ""; // Masuk mode edit
 
-    const editJudul = document.createElement("input");
-    editJudul.type = "text";
-    editJudul.value = t.judul;
+  const inputJudul = document.createElement("input");
+  inputJudul.value = item.judul;
+  inputJudul.placeholder = "Judul Template";
 
-    const editIsi = document.createElement("textarea");
-    editIsi.value = t.isi;
-    editIsi.rows = 4;
+  const inputIsi = document.createElement("textarea");
+  inputIsi.value = item.isi;
+  inputIsi.placeholder = "Isi Template";
+
+  const simpanBtn = document.createElement("button");
+  simpanBtn.textContent = "Simpan Perubahan";
+
+  const batalBtn = document.createElement("button");
+  batalBtn.textContent = "Batal";
+
+  // ⬅️ Buat div wrapper horizontal
+  const editFlex = document.createElement("div");
+  editFlex.className = "template-buttons";
+  editFlex.appendChild(simpanBtn);
+  editFlex.appendChild(batalBtn);
+
+  div.appendChild(inputJudul);
+  div.appendChild(inputIsi);
+  div.appendChild(editFlex);
+
+  simpanBtn.onclick = () => {
+    const newJudul = inputJudul.value.trim();
+    const newIsi = inputIsi.value.trim();
+
+    if (!newJudul || !newIsi) {
+      alert("Judul dan isi tidak boleh kosong.");
+      return;
+    }
+
+    const semuaTemplate = JSON.parse(localStorage.getItem("templateAutoReply")) || [];
+    const judulDuplikat = semuaTemplate.find(
+      (t) => t.judul.toLowerCase() === newJudul.toLowerCase() && t !== item
+    );
+    if (judulDuplikat) {
+      alert("Judul template sudah digunakan.");
+      return;
+    }
+
+    item.judul = newJudul;
+    item.isi = newIsi;
+    localStorage.setItem("templateAutoReply", JSON.stringify(semuaTemplate));
+    tampilkanTemplate();
+  };
+
+  batalBtn.onclick = () => tampilkanTemplate();
+};
 
     const simpanEditBtn = document.createElement("button");
     simpanEditBtn.innerText = "Simpan Perubahan";
