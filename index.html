@@ -333,17 +333,6 @@ div.appendChild(buttonWrapper);
   });
 }
 
-
-function salinTemplate(teks) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(teks)
-      .then(() => alert("Isi template telah disalin ke clipboard!"))
-      .catch(() => fallbackSalin(teks));
-  } else {
-    fallbackSalin(teks);
-  }
-}
-
 function fallbackSalin(teks) {
   const area = document.createElement("textarea");
   area.value = teks;
@@ -356,23 +345,6 @@ function fallbackSalin(teks) {
     alert("Gagal menyalin.");
   }
   document.body.removeChild(area);
-}
-
-function hapusTemplate(index) {
-  const container = document.getElementById("daftarTemplate");
-  const item = [...container.children].find(child => {
-    const strong = child.querySelector("strong");
-    return strong && strong.innerText === templates[index].judul;
-  });
-
-  if (confirm("Yakin ingin menghapus template ini?")) {
-    if (item) item.classList.add("remove");
-    setTimeout(() => {
-      templates.splice(index, 1);
-      localStorage.setItem("templates", JSON.stringify(templates));
-      tampilkanTemplate();
-    }, 400);
-  }
 }
 
   function escapeHtml(text) {
