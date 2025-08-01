@@ -98,34 +98,27 @@
       background-color: #2a2a2a;
       color: #f0f4ff;
     }
-    .template p {
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 7.5em;
-  white-space: pre-wrap;
-  margin: 10px 0;
-}
-.template-buttons button {
-  font-size: 12px;
-  padding: 4px 8px;
-  margin: 0 4px;
-  border: none;
-  border-radius: 6px;
-  background-color: #ccc;
-  cursor: pointer;
-  white-space: nowrap;
-  max-width: 80px; /* supaya tidak meluber */
-  overflow: hidden;
-  text-overflow: ellipsis;
+    .template-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap; /* agar responsive di layar kecil */
 }
 
-.template-buttons {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap; /* biar responsif di layar kecil */
+.template-buttons button {
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.template p {
+  white-space: pre-wrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 6em;
 }
 
 .template-card.show {
@@ -202,8 +195,6 @@
   </div>
 
 <script>
-  let templates = [];
-
   try {
     const stored = JSON.parse(localStorage.getItem("templates"));
     if (Array.isArray(stored)) {
@@ -293,14 +284,12 @@ function tampilkanTemplate() {
         if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
 
         const semuaTemplate = JSON.parse(localStorage.getItem("templates") || "[]");
-        const idx = semuaTemplate.findIndex(x => x.judul === t.judul && x.isi === t.isi);
-        if (idx !== -1) {
-          semuaTemplate[idx] = {
-            judul: editJudul.value.trim(),
-            isi: editIsi.value.trim(),
-          };
-          localStorage.setItem("templates", JSON.stringify(semuaTemplate));
-          tampilkanTemplate();
+semuaTemplate[t.index] = {
+  judul: editJudul.value.trim(),
+  isi: editIsi.value.trim(),
+};
+localStorage.setItem("templates", JSON.stringify(semuaTemplate));
+tampilkanTemplate();
         }
       };
 
@@ -329,15 +318,16 @@ function tampilkanTemplate() {
       }
     };
 
-    const buttonGroup = document.createElement("div");
-    buttonGroup.className = "button-group";
-    buttonGroup.appendChild(copyBtn);
-    buttonGroup.appendChild(editBtn);
-    buttonGroup.appendChild(hapusBtn);
+    const buttonWrapper = document.createElement("div");
+buttonWrapper.className = "template-buttons"; // class baru khusus horizontal
 
-    div.appendChild(judul);
-    div.appendChild(isi);
-    div.appendChild(buttonGroup);
+buttonWrapper.appendChild(copyBtn);
+buttonWrapper.appendChild(editBtn);
+buttonWrapper.appendChild(hapusBtn);
+
+div.appendChild(judul);
+div.appendChild(isi);
+div.appendChild(buttonWrapper);
 
     daftar.appendChild(div);
   });
