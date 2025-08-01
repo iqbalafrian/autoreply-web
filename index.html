@@ -107,12 +107,13 @@
 }
 .template-buttons {
   display: flex;
-  justify-content: flex-start; /* atau space-between jika ingin jarak rata */
-  gap: 8px; /* jarak antar tombol */
+  justify-content: flex-start;
+  gap: 8px;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
-.template-buttons .btn {
+.template-buttons button {
   flex-shrink: 0;
   padding: 8px 16px;
   background-color: #007bff;
@@ -123,7 +124,7 @@
   font-weight: bold;
 }
 
-.template-buttons .btn:hover {
+.template-buttons button:hover {
   opacity: 0.9;
 }
 
@@ -229,8 +230,8 @@ setTimeout(() => div.classList.add("show"), 10);
     isiEl.innerText = t.isi;
 
     const flexBox = document.createElement("div");
-    flexBox.className = "flex";
-
+flexBox.className = "template-buttons";
+    
     const salinBtn = document.createElement("button");
     salinBtn.innerText = "Salin";
     salinBtn.onclick = () => salinTemplate(t.isi);
@@ -251,9 +252,9 @@ setTimeout(() => div.classList.add("show"), 10);
       editIsi.rows = 3;
       editIsi.style.marginTop = "5px";
 
-      simpanEditBtn.onclick = () => {
-  const newJudul = editJudul.value.trim();
-  const newIsi = editIsi.value.trim();
+      const simpanEditBtn = document.createElement("button");
+simpanEditBtn.innerText = "Simpan";
+simpanEditBtn.style.marginTop = "10px";
 
   if (!newJudul || !newIsi) {
     alert("Judul dan isi tidak boleh kosong.");
@@ -280,8 +281,8 @@ setTimeout(() => div.classList.add("show"), 10);
     };
 
     flexBox.appendChild(salinBtn);
-    flexBox.appendChild(editBtn);
-    flexBox.appendChild(hapusBtn);
+flexBox.appendChild(editBtn);
+flexBox.appendChild(hapusBtn);
 
     div.appendChild(judulEl);
     div.appendChild(isiEl);
