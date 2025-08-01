@@ -9,143 +9,152 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="manifest" href="manifest.json" />
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f0f4ff;
-      color: #003366;
-      padding: 20px;
-    }
-    .template {
-  transition: all 0.3s ease;
-}
-    input, textarea, select, button {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 100%;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      border: none;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
- .template-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-    .template-content {
-  max-width: 70%;
-}
-    .flex {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .icon-button {
-      background-color: #e0e7ff;
-      border: none;
-      border-radius: 50%;
-      padding: 10px;
-      cursor: pointer;
-      font-size: 18px;
-    }
-    .icon-button:hover {
-      background-color: #c7d2fe;
-    }
-    #searchInput {
-      display: none;
-      margin-left: 10px;
-      width: auto;
-    }
-    svg {
-      vertical-align: middle;
-    }
-    [data-theme='dark'] {
-      background-color: #1a1a1a;
-      color: #f0f4ff;
-    }
-    [data-theme='dark'] .card {
-      background-color: #2a2a2a;
-    }
-    [data-theme='dark'] .template {
-      background: #333;
-      color: #f0f4ff;
-    }
-    [data-theme='dark'] input,
-    [data-theme='dark'] textarea {
-      background-color: #2a2a2a;
-      color: #f0f4ff;
-      border: 1px solid #555;
-    }
-    [data-theme='dark'] #searchInput {
-      background-color: #2a2a2a;
-      color: #f0f4ff;
-    }
-    .template p {
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 7.5em;
-  white-space: pre-wrap;
-  margin: 10px 0;
-}
-.template-buttons button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  width: 80px;
-}
+ <style>
+  body {
+    font-family: sans-serif;
+    background-color: #f0f4ff;
+    color: #003366;
+    padding: 20px;
+  }
 
-.template-buttons button:nth-child(1) { background: #007bff; color: #fff; }
-.template-buttons button:nth-child(2) { background: #0091ff; color: #fff; }
-.template-buttons button:nth-child(3) { background: #dc3545; color: #fff; }
+  input, textarea, select, button {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+  }
 
-.template-buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
+  button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+  }
 
-.template-card.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+  button:hover {
+    background-color: #0056b3;
+  }
 
-.template-card.remove {
-  opacity: 0;
-  transform: translateX(40px);
-}
-  </style>
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .template-item {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .template-content {
+    max-width: 100%;
+  }
+
+  .template-item strong {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .template-item p {
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Jumlah baris sebelum ellipsis */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+    margin: 10px 0;
+  }
+
+  .template-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .template-buttons button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    width: 80px;
+  }
+
+  .template-buttons button:nth-child(1) { background: #007bff; color: #fff; }
+  .template-buttons button:nth-child(2) { background: #0091ff; color: #fff; }
+  .template-buttons button:nth-child(3) { background: #dc3545; color: #fff; }
+
+  .flex {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .icon-button {
+    background-color: #e0e7ff;
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .icon-button:hover {
+    background-color: #c7d2fe;
+  }
+
+  #searchInput {
+    display: none;
+    margin-left: 10px;
+    width: auto;
+  }
+
+  svg {
+    vertical-align: middle;
+  }
+
+  [data-theme='dark'] {
+    background-color: #1a1a1a;
+    color: #f0f4ff;
+  }
+
+  [data-theme='dark'] .card {
+    background-color: #2a2a2a;
+  }
+
+  [data-theme='dark'] .template-item {
+    background: #333;
+    color: #f0f4ff;
+  }
+
+  [data-theme='dark'] input,
+  [data-theme='dark'] textarea {
+    background-color: #2a2a2a;
+    color: #f0f4ff;
+    border: 1px solid #555;
+  }
+
+  [data-theme='dark'] #searchInput {
+    background-color: #2a2a2a;
+    color: #f0f4ff;
+  }
+</style>
 </head>
 <body>
   <div class="toolbar">
@@ -223,67 +232,49 @@ function tampilkanTemplate() {
 
   templates.forEach(t => {
     const container = document.createElement("div");
-    container.className = "template-item";
+container.className = "template-item";
 
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "template-content";
+// Judul
+const judul = document.createElement("strong");
+judul.innerText = t.judul;
 
-    const judul = document.createElement("strong");
-    judul.innerText = t.judul;
+// Isi dengan ellipsis
+const isi = document.createElement("p");
+isi.className = "template-content"; // tambahkan class agar CSS ellipsis bekerja
+isi.innerText = t.isi;
 
-    const isi = document.createElement("p");
-    isi.innerText = t.isi;
-    isi.style.whiteSpace = "pre-wrap";
-    isi.style.marginTop = "8px";
+// Tombol: Salin, Edit, Hapus
+const tombolDiv = document.createElement("div");
+tombolDiv.className = "template-buttons";
 
-    contentDiv.appendChild(judul);
-    contentDiv.appendChild(isi);
+// Tombol Salin
+const salinBtn = document.createElement("button");
+salinBtn.innerText = "Salin";
+salinBtn.onclick = () => {
+  navigator.clipboard.writeText(t.isi).then(() => alert("Disalin!"));
+};
 
-    const tombolDiv = document.createElement("div");
-    tombolDiv.className = "template-buttons";
+// Tombol Edit
+const editBtn = document.createElement("button");
+editBtn.innerText = "Edit";
+// tambahkan fungsi edit sesuai kebutuhan
 
-    const copyBtn = document.createElement("button");
-    copyBtn.innerText = "Salin";
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(t.isi).catch(() => {
-        const textarea = document.createElement("textarea");
-        textarea.value = t.isi;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      });
-    };
+// Tombol Hapus
+const hapusBtn = document.createElement("button");
+hapusBtn.innerText = "Hapus";
+// tambahkan fungsi hapus sesuai kebutuhan
 
-    const editBtn = document.createElement("button");
-    editBtn.innerText = "Edit";
-    editBtn.onclick = () => {
-      // Tetap gunakan kode edit seperti sebelumnya
-      document.getElementById("judul").value = t.judul;
-      document.getElementById("isi").value = t.isi;
-    };
+// Susun tombol ke dalam div tombol
+tombolDiv.appendChild(salinBtn);
+tombolDiv.appendChild(editBtn);
+tombolDiv.appendChild(hapusBtn);
 
-    const hapusBtn = document.createElement("button");
-    hapusBtn.innerText = "Hapus";
-    hapusBtn.onclick = () => {
-      if (confirm("Hapus template ini?")) {
-        const data = JSON.parse(localStorage.getItem("templates") || "[]");
-        data.splice(t.index, 1);
-        localStorage.setItem("templates", JSON.stringify(data));
-        tampilkanTemplate();
-      }
-    };
+// Susun ke dalam container (urutan penting!)
+container.appendChild(judul);
+container.appendChild(isi);        // isi dulu
+container.appendChild(tombolDiv); // tombol di bawah isi
 
-    tombolDiv.appendChild(copyBtn);
-    tombolDiv.appendChild(editBtn);
-    tombolDiv.appendChild(hapusBtn);
-
-    container.appendChild(contentDiv);
-    container.appendChild(tombolDiv);
-
-    daftar.appendChild(container);
-  });
-}
+templateList.appendChild(container);
 
 function salinTemplate(teks) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
