@@ -248,21 +248,27 @@ setTimeout(() => div.classList.add("show"), 10);
       editIsi.rows = 3;
       editIsi.style.marginTop = "5px";
 
-      const simpanEditBtn = document.createElement("button");
-      simpanEditBtn.innerText = "Simpan";
       simpanEditBtn.onclick = () => {
-        const newJudul = editJudul.value.trim();
-        const newIsi = editIsi.value.trim();
+  const newJudul = editJudul.value.trim();
+  const newIsi = editIsi.value.trim();
 
-        if (!newJudul || !newIsi) {
-          alert("Judul dan isi tidak boleh kosong.");
-          return;
-        }
+  if (!newJudul || !newIsi) {
+    alert("Judul dan isi tidak boleh kosong.");
+    return;
+  }
 
-        templates[t.index] = { judul: newJudul, isi: newIsi };
-        localStorage.setItem("templates", JSON.stringify(templates));
-        tampilkanTemplate();
-      };
+  const judulSudahAda = templates.some((tpl, i) =>
+    i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
+  );
+  if (judulSudahAda) {
+    alert("Judul template sudah digunakan.");
+    return;
+  }
+
+  templates[t.index] = { judul: newJudul, isi: newIsi };
+  localStorage.setItem("templates", JSON.stringify(templates));
+  tampilkanTemplate();
+};
 
       div.innerHTML = "";
       div.appendChild(editJudul);
@@ -282,21 +288,39 @@ setTimeout(() => div.classList.add("show"), 10);
   });
 }
 
-// ⬇️ Letakkan FUNGSI di luar tampilkanTemplate()
-
 function salinTemplate(teks) {
-  navigator.clipboard.writeText(teks).then(() => {
-    alert("Isi template telah disalin ke clipboard!");
-  }).catch(err => {
-    alert("Gagal menyalin: " + err);
-  });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(teks)
+      .then(() => alert("Isi template telah disalin ke clipboard!"))
+      .catch(() => fallbackSalin(teks));
+  } else {
+    fallbackSalin(teks);
+  }
+}
+
+function fallbackSalin(teks) {
+  const area = document.createElement("textarea");
+  area.value = teks;
+  document.body.appendChild(area);
+  area.select();
+  try {
+    document.execCommand("copy");
+    alert("Isi template telah disalin (fallback)!");
+  } catch {
+    alert("Gagal menyalin.");
+  }
+  document.body.removeChild(area);
 }
 
 function hapusTemplate(index) {
   const container = document.getElementById("daftarTemplate");
-  const item = container.children[index];
+  const item = [...container.children].find(child => {
+    const strong = child.querySelector("strong");
+    return strong && strong.innerText === templates[index].judul;
+  });
+
   if (confirm("Yakin ingin menghapus template ini?")) {
-    item.classList.add("remove"); // animasi keluar
+    if (item) item.classList.add("remove");
     setTimeout(() => {
       templates.splice(index, 1);
       localStorage.setItem("templates", JSON.stringify(templates));
