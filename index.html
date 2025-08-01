@@ -98,27 +98,34 @@
       background-color: #2a2a2a;
       color: #f0f4ff;
     }
-    .template-buttons {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-  flex-wrap: wrap; /* agar responsive di layar kecil */
-}
-
-.template-buttons button {
-  padding: 4px 8px;
-  font-size: 12px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
-.template p {
-  white-space: pre-wrap;
+    .template p {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 6em;
+  max-height: 7.5em;
+  white-space: pre-wrap;
+  margin: 10px 0;
+}
+.template-buttons button {
+  font-size: 12px;
+  padding: 4px 8px;
+  margin: 0 4px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ccc;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 80px; /* supaya tidak meluber */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.template-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap; /* biar responsif di layar kecil */
 }
 
 .template-card.show {
@@ -130,39 +137,6 @@
   opacity: 0;
   transform: translateX(40px);
 }
-    .template-item {
-  margin-bottom: 16px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #f9fbff;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-[data-theme='dark'] .template-item {
-  background-color: #2b2b2b;
-  border-color: #444;
-}
-
-.button-group {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.button-group button {
-  padding: 6px 12px;
-  font-size: 13px;
-  white-space: nowrap;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
   </style>
 </head>
 <body>
@@ -195,6 +169,8 @@
   </div>
 
 <script>
+  let templates = [];
+
   try {
     const stored = JSON.parse(localStorage.getItem("templates"));
     if (Array.isArray(stored)) {
@@ -266,7 +242,7 @@ function tampilkanTemplate() {
     const editBtn = document.createElement("button");
     editBtn.innerText = "Edit";
     editBtn.onclick = () => {
-      div.innerHTML = "";
+      div.innerHTML = ""; // Masuk mode edit
 
       const editJudul = document.createElement("input");
       editJudul.type = "text";
@@ -279,18 +255,16 @@ function tampilkanTemplate() {
       editIsi.style.marginBottom = "10px";
 
       const simpanEditBtn = document.createElement("button");
-      simpanEditBtn.innerText = "Simpan";
+      simpanEditBtn.innerText = "Simpan Perubahan";
       simpanEditBtn.onclick = () => {
         if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
 
-        const semuaTemplate = JSON.parse(localStorage.getItem("templates") || "[]");
-semuaTemplate[t.index] = {
-  judul: editJudul.value.trim(),
-  isi: editIsi.value.trim(),
-};
-localStorage.setItem("templates", JSON.stringify(semuaTemplate));
-tampilkanTemplate();
-        }
+        templates[t.index] = {
+          judul: editJudul.value.trim(),
+          isi: editIsi.value.trim(),
+        };
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
       };
 
       const batalBtn = document.createElement("button");
@@ -298,7 +272,9 @@ tampilkanTemplate();
       batalBtn.onclick = () => tampilkanTemplate();
 
       const tombolWrapper = document.createElement("div");
-      tombolWrapper.className = "button-group";
+      tombolWrapper.className = "template-buttons"; // CSS ini atur horizontal
+      tombolWrapper.style.display = "flex";
+      tombolWrapper.style.gap = "8px";
       tombolWrapper.appendChild(simpanEditBtn);
       tombolWrapper.appendChild(batalBtn);
 
@@ -318,19 +294,25 @@ tampilkanTemplate();
       }
     };
 
-    const buttonWrapper = document.createElement("div");
-buttonWrapper.className = "template-buttons"; // class baru khusus horizontal
-
-buttonWrapper.appendChild(copyBtn);
-buttonWrapper.appendChild(editBtn);
-buttonWrapper.appendChild(hapusBtn);
-
-div.appendChild(judul);
-div.appendChild(isi);
-div.appendChild(buttonWrapper);
+    // Tambahkan ke DOM
+    div.appendChild(judul);
+    div.appendChild(isi);
+    div.appendChild(copyBtn);
+    div.appendChild(editBtn);
+    div.appendChild(hapusBtn);
 
     daftar.appendChild(div);
   });
+}
+
+function salinTemplate(teks) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(teks)
+      .then(() => alert("Isi template telah disalin ke clipboard!"))
+      .catch(() => fallbackSalin(teks));
+  } else {
+    fallbackSalin(teks);
+  }
 }
 
 function fallbackSalin(teks) {
@@ -345,6 +327,23 @@ function fallbackSalin(teks) {
     alert("Gagal menyalin.");
   }
   document.body.removeChild(area);
+}
+
+function hapusTemplate(index) {
+  const container = document.getElementById("daftarTemplate");
+  const item = [...container.children].find(child => {
+    const strong = child.querySelector("strong");
+    return strong && strong.innerText === templates[index].judul;
+  });
+
+  if (confirm("Yakin ingin menghapus template ini?")) {
+    if (item) item.classList.add("remove");
+    setTimeout(() => {
+      templates.splice(index, 1);
+      localStorage.setItem("templates", JSON.stringify(templates));
+      tampilkanTemplate();
+    }, 400);
+  }
 }
 
   function escapeHtml(text) {
