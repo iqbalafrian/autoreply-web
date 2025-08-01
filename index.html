@@ -242,30 +242,46 @@ function tampilkanTemplate() {
     const editBtn = document.createElement("button");
     editBtn.innerText = "Edit";
     editBtn.onclick = () => {
-      div.innerHTML = "";
+  div.innerHTML = ""; // Masuk mode edit
 
-      const inputJudul = document.createElement("input");
-      inputJudul.value = t.judul;
-      inputJudul.placeholder = "Judul Template";
+  const editJudul = document.createElement("input");
+  editJudul.type = "text";
+  editJudul.value = template.judul;
+  editJudul.style.marginBottom = "5px";
 
-      const inputIsi = document.createElement("textarea");
-      inputIsi.value = t.isi;
-      inputIsi.placeholder = "Isi Template";
+  const editIsi = document.createElement("textarea");
+  editIsi.value = template.isi;
+  editIsi.rows = 4;
+  editIsi.style.marginBottom = "10px";
 
-      const simpanBtn = document.createElement("button");
-      simpanBtn.textContent = "Simpan Perubahan";
+  // Tombol Simpan & Batal
+  const simpanEditBtn = document.createElement("button");
+  simpanEditBtn.innerText = "Simpan Perubahan";
+  simpanEditBtn.onclick = () => {
+    if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
+    templates[index] = {
+      judul: editJudul.value,
+      isi: editIsi.value,
+    };
+    simpanKeLocalStorage();
+    tampilkanTemplate();
+  };
 
-      const batalBtn = document.createElement("button");
-      batalBtn.textContent = "Batal";
+  const batalBtn = document.createElement("button");
+  batalBtn.innerText = "Batal";
+  batalBtn.onclick = () => tampilkanTemplate();
 
-      const tombolEditFlex = document.createElement("div");
-      tombolEditFlex.className = "template-buttons";
-      tombolEditFlex.appendChild(simpanBtn);
-      tombolEditFlex.appendChild(batalBtn);
+  // ✅ Bungkus kedua tombol ke dalam flex container
+  const tombolWrapper = document.createElement("div");
+  tombolWrapper.className = "template-buttons";
+  tombolWrapper.appendChild(simpanEditBtn);
+  tombolWrapper.appendChild(batalBtn);
 
-      div.appendChild(inputJudul);
-      div.appendChild(inputIsi);
-      div.appendChild(tombolEditFlex);
+  // Masukkan ke div utama
+  div.appendChild(editJudul);
+  div.appendChild(editIsi);
+  div.appendChild(tombolWrapper); // ✅ Tombol horizontal sekarang
+};
 
       simpanBtn.onclick = () => {
         const newJudul = inputJudul.value.trim();
