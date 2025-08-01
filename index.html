@@ -222,88 +222,86 @@ function tampilkanTemplate() {
   }
 
   hasil.forEach(t => {
-    const div = document.createElement("div");
-div.className = "template template-card";
-setTimeout(() => div.classList.add("show"), 10);
+  const div = document.createElement("div");
+  div.className = "template template-card";
+  setTimeout(() => div.classList.add("show"), 10);
 
-    const judulEl = document.createElement("strong");
-    judulEl.innerText = t.judul;
+  const judulEl = document.createElement("strong");
+  judulEl.innerText = t.judul;
 
-    const isiEl = document.createElement("p");
-    isiEl.innerText = t.isi;
+  const isiEl = document.createElement("p");
+  isiEl.innerText = t.isi;
 
-    const flexBox = document.createElement("div");
-flexBox.className = "template-buttons";
-    
-    const salinBtn = document.createElement("button");
-    salinBtn.innerText = "Salin";
-    salinBtn.onclick = () => salinTemplate(t.isi);
+  const flexBox = document.createElement("div");
+  flexBox.className = "template-buttons";
 
-    const hapusBtn = document.createElement("button");
-    hapusBtn.innerText = "Hapus";
-    hapusBtn.onclick = () => hapusTemplate(t.index);
+  const salinBtn = document.createElement("button");
+  salinBtn.innerText = "Salin";
+  salinBtn.onclick = () => salinTemplate(t.isi);
 
-editBtn.onclick = () => {
-  div.innerHTML = ""; // Bersihkan isi div saat masuk mode edit
+  const editBtn = document.createElement("button"); // ✅ fix
+  editBtn.innerText = "Edit";
+  editBtn.onclick = () => {
+    div.innerHTML = ""; // Masuk mode edit
 
-  const editJudul = document.createElement("input");
-  editJudul.type = "text";
-  editJudul.value = t.judul;
-  editJudul.style.marginTop = "5px";
+    const editJudul = document.createElement("input");
+    editJudul.type = "text";
+    editJudul.value = t.judul;
 
-  const editIsi = document.createElement("textarea");
-  editIsi.value = t.isi;
-  editIsi.rows = 4;
-  editIsi.style.marginTop = "10px";
+    const editIsi = document.createElement("textarea");
+    editIsi.value = t.isi;
+    editIsi.rows = 4;
 
-  const simpanEditBtn = document.createElement("button");
-  simpanEditBtn.innerText = "Simpan Perubahan";
-  simpanEditBtn.style.marginTop = "10px";
+    const simpanEditBtn = document.createElement("button");
+    simpanEditBtn.innerText = "Simpan Perubahan";
 
-  simpanEditBtn.onclick = () => {
-    const newJudul = editJudul.value.trim();
-    const newIsi = editIsi.value.trim();
+    simpanEditBtn.onclick = () => {
+      const newJudul = editJudul.value.trim();
+      const newIsi = editIsi.value.trim();
 
-    if (!newJudul || !newIsi) {
-      alert("Judul dan isi tidak boleh kosong.");
-      return;
-    }
+      if (!newJudul || !newIsi) {
+        alert("Judul dan isi tidak boleh kosong.");
+        return;
+      }
 
-    const judulSudahAda = templates.some((tpl, i) =>
-      i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
-    );
-    if (judulSudahAda) {
-      alert("Judul template sudah digunakan.");
-      return;
-    }
+      const judulSudahAda = templates.some((tpl, i) =>
+        i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
+      );
+      if (judulSudahAda) {
+        alert("Judul template sudah digunakan.");
+        return;
+      }
 
-    templates[t.index] = { judul: newJudul, isi: newIsi };
-    localStorage.setItem("templates", JSON.stringify(templates));
-    tampilkanTemplate();
-  };
-
-  div.appendChild(editJudul);
-  div.appendChild(editIsi);
-  div.appendChild(simpanEditBtn);
-};
-
-      div.innerHTML = "";
-      div.appendChild(editJudul);
-      div.appendChild(editIsi);
-      div.appendChild(simpanEditBtn);
+      templates[t.index] = { judul: newJudul, isi: newIsi };
+      localStorage.setItem("templates", JSON.stringify(templates));
+      tampilkanTemplate();
     };
 
-    flexBox.appendChild(salinBtn);
-flexBox.appendChild(editBtn);
-flexBox.appendChild(hapusBtn);
+    const batalBtn = document.createElement("button");
+batalBtn.innerText = "Batal";
+batalBtn.onclick = tampilkanTemplate;
 
-    div.appendChild(judulEl);
-    div.appendChild(isiEl);
-    div.appendChild(flexBox);
+div.appendChild(editJudul);
+div.appendChild(editIsi);
+div.appendChild(simpanEditBtn);
+div.appendChild(batalBtn); // << tambah di sini
 
-    container.appendChild(div);
-  });
-}
+  };
+
+  const hapusBtn = document.createElement("button");
+  hapusBtn.innerText = "Hapus";
+  hapusBtn.onclick = () => hapusTemplate(t.index);
+
+  flexBox.appendChild(salinBtn);
+  flexBox.appendChild(editBtn);
+  flexBox.appendChild(hapusBtn);
+
+  div.appendChild(judulEl);
+  div.appendChild(isiEl);
+  div.appendChild(flexBox);
+
+  container.appendChild(div);
+});
 
 function salinTemplate(teks) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
