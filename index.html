@@ -110,10 +110,8 @@
 }
 .template-buttons {
   display: flex;
-  justify-content: flex-start;
   gap: 8px;
-  margin-top: 10px;
-  flex-wrap: wrap;
+  margin-top: 8px;
 }
 
 .template-buttons button {
@@ -208,119 +206,103 @@
   }
 
 function tampilkanTemplate() {
-  const keyword = (document.getElementById("searchInput").value || "").toLowerCase();
-  const container = document.getElementById("daftarTemplate");
-  container.innerHTML = "";
+  const daftar = document.getElementById("daftarTemplate");
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  daftar.innerHTML = "";
 
-  const hasil = templates
+  const templates = JSON.parse(localStorage.getItem("templates") || "[]")
     .map((t, i) => ({ ...t, index: i }))
-    .filter(t => (t.judul?.toLowerCase().includes(keyword) || t.isi?.toLowerCase().includes(keyword)));
+    .filter(t => t.judul.toLowerCase().includes(query) || t.isi.toLowerCase().includes(query));
 
-  if (hasil.length === 0) {
-    container.innerHTML = "<p>Tidak ada template ditemukan.</p>";
-    return;
-  }
-
-  hasil.forEach(t => {
+  templates.forEach(t => {
     const div = document.createElement("div");
-    div.className = "template template-card";
-    setTimeout(() => div.classList.add("show"), 10);
+    div.className = "template-item";
 
-    const judulEl = document.createElement("strong");
-    judulEl.innerText = t.judul;
+    const judul = document.createElement("strong");
+    judul.innerText = t.judul;
 
-    const isiEl = document.createElement("p");
-    isiEl.innerText = t.isi;
+    const isi = document.createElement("p");
+    isi.innerText = t.isi;
+    isi.style.whiteSpace = "nowrap";
+    isi.style.overflow = "hidden";
+    isi.style.textOverflow = "ellipsis";
 
-    const flexBox = document.createElement("div");
-    flexBox.className = "template-buttons";
-
-    const salinBtn = document.createElement("button");
-    salinBtn.innerText = "Salin";
-    salinBtn.onclick = () => salinTemplate(t.isi);
+    const copyBtn = document.createElement("button");
+    copyBtn.innerText = "Salin";
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(t.isi).catch(() => {
+        const textarea = document.createElement("textarea");
+        textarea.value = t.isi;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      });
+    };
 
     const editBtn = document.createElement("button");
     editBtn.innerText = "Edit";
     editBtn.onclick = () => {
-  div.innerHTML = ""; // Masuk mode edit
+      div.innerHTML = ""; // Masuk mode edit
 
-  const editJudul = document.createElement("input");
-  editJudul.type = "text";
-  editJudul.value = template.judul;
-  editJudul.style.marginBottom = "5px";
+      const editJudul = document.createElement("input");
+      editJudul.type = "text";
+      editJudul.value = t.judul;
+      editJudul.style.marginBottom = "5px";
 
-  const editIsi = document.createElement("textarea");
-  editIsi.value = template.isi;
-  editIsi.rows = 4;
-  editIsi.style.marginBottom = "10px";
+      const editIsi = document.createElement("textarea");
+      editIsi.value = t.isi;
+      editIsi.rows = 4;
+      editIsi.style.marginBottom = "10px";
 
-  // Tombol Simpan & Batal
-  const simpanEditBtn = document.createElement("button");
-  simpanEditBtn.innerText = "Simpan Perubahan";
-  simpanEditBtn.onclick = () => {
-    if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
-    templates[index] = {
-      judul: editJudul.value,
-      isi: editIsi.value,
-    };
-    simpanKeLocalStorage();
-    tampilkanTemplate();
-  };
+      const simpanEditBtn = document.createElement("button");
+      simpanEditBtn.innerText = "Simpan Perubahan";
+      simpanEditBtn.onclick = () => {
+        if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
 
-  const batalBtn = document.createElement("button");
-  batalBtn.innerText = "Batal";
-  batalBtn.onclick = () => tampilkanTemplate();
-
-  // ✅ Bungkus kedua tombol ke dalam flex container
-  const tombolWrapper = document.createElement("div");
-  tombolWrapper.className = "template-buttons";
-  tombolWrapper.appendChild(simpanEditBtn);
-  tombolWrapper.appendChild(batalBtn);
-
-  // Masukkan ke div utama
-  div.appendChild(editJudul);
-  div.appendChild(editIsi);
-  div.appendChild(tombolWrapper); // ✅ Tombol horizontal sekarang
-};
-
-      simpanBtn.onclick = () => {
-        const newJudul = inputJudul.value.trim();
-        const newIsi = inputIsi.value.trim();
-
-        if (!newJudul || !newIsi) {
-          alert("Judul dan isi tidak boleh kosong.");
-          return;
-        }
-
-        const judulDuplikat = templates.some((tpl, i) =>
-          i !== t.index && tpl.judul.toLowerCase() === newJudul.toLowerCase()
-        );
-        if (judulDuplikat) {
-          alert("Judul template sudah digunakan.");
-          return;
-        }
-
-        templates[t.index] = { judul: newJudul, isi: newIsi };
+        templates[t.index] = {
+          judul: editJudul.value.trim(),
+          isi: editIsi.value.trim(),
+        };
         localStorage.setItem("templates", JSON.stringify(templates));
         tampilkanTemplate();
       };
 
+      const batalBtn = document.createElement("button");
+      batalBtn.innerText = "Batal";
       batalBtn.onclick = () => tampilkanTemplate();
+
+      const tombolWrapper = document.createElement("div");
+      tombolWrapper.className = "template-buttons"; // CSS ini atur horizontal
+      tombolWrapper.style.display = "flex";
+      tombolWrapper.style.gap = "8px";
+      tombolWrapper.appendChild(simpanEditBtn);
+      tombolWrapper.appendChild(batalBtn);
+
+      div.appendChild(editJudul);
+      div.appendChild(editIsi);
+      div.appendChild(tombolWrapper);
     };
 
     const hapusBtn = document.createElement("button");
     hapusBtn.innerText = "Hapus";
-    hapusBtn.onclick = () => hapusTemplate(t.index);
+    hapusBtn.onclick = () => {
+      if (confirm("Hapus template ini?")) {
+        const data = JSON.parse(localStorage.getItem("templates") || "[]");
+        data.splice(t.index, 1);
+        localStorage.setItem("templates", JSON.stringify(data));
+        tampilkanTemplate();
+      }
+    };
 
-    flexBox.appendChild(salinBtn);
-    flexBox.appendChild(editBtn);
-    flexBox.appendChild(hapusBtn);
+    // Tambahkan ke DOM
+    div.appendChild(judul);
+    div.appendChild(isi);
+    div.appendChild(copyBtn);
+    div.appendChild(editBtn);
+    div.appendChild(hapusBtn);
 
-    div.appendChild(judulEl);
-    div.appendChild(isiEl);
-    div.appendChild(flexBox);
-
-    container.appendChild(div);
+    daftar.appendChild(div);
   });
 }
 
