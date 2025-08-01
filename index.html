@@ -137,6 +137,39 @@
   opacity: 0;
   transform: translateX(40px);
 }
+    .template-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+[data-theme='dark'] .template-item {
+  background-color: #2b2b2b;
+  border-color: #444;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.button-group button {
+  padding: 6px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
   </style>
 </head>
 <body>
@@ -242,7 +275,7 @@ function tampilkanTemplate() {
     const editBtn = document.createElement("button");
     editBtn.innerText = "Edit";
     editBtn.onclick = () => {
-      div.innerHTML = ""; // Masuk mode edit
+      div.innerHTML = "";
 
       const editJudul = document.createElement("input");
       editJudul.type = "text";
@@ -259,12 +292,16 @@ function tampilkanTemplate() {
       simpanEditBtn.onclick = () => {
         if (editJudul.value.trim() === "" || editIsi.value.trim() === "") return;
 
-        templates[t.index] = {
-          judul: editJudul.value.trim(),
-          isi: editIsi.value.trim(),
-        };
-        localStorage.setItem("templates", JSON.stringify(templates));
-        tampilkanTemplate();
+        const semuaTemplate = JSON.parse(localStorage.getItem("templates") || "[]");
+        const idx = semuaTemplate.findIndex(x => x.judul === t.judul && x.isi === t.isi);
+        if (idx !== -1) {
+          semuaTemplate[idx] = {
+            judul: editJudul.value.trim(),
+            isi: editIsi.value.trim(),
+          };
+          localStorage.setItem("templates", JSON.stringify(semuaTemplate));
+          tampilkanTemplate();
+        }
       };
 
       const batalBtn = document.createElement("button");
@@ -272,9 +309,7 @@ function tampilkanTemplate() {
       batalBtn.onclick = () => tampilkanTemplate();
 
       const tombolWrapper = document.createElement("div");
-      tombolWrapper.style.display = "flex";
-      tombolWrapper.style.gap = "8px";
-      tombolWrapper.style.marginTop = "8px";
+      tombolWrapper.className = "button-group";
       tombolWrapper.appendChild(simpanEditBtn);
       tombolWrapper.appendChild(batalBtn);
 
@@ -294,18 +329,15 @@ function tampilkanTemplate() {
       }
     };
 
-    // ✅ Buat grup tombol horizontal
     const buttonGroup = document.createElement("div");
-    buttonGroup.style.display = "flex";
-    buttonGroup.style.gap = "6px";
-    buttonGroup.style.marginTop = "6px";
+    buttonGroup.className = "button-group";
     buttonGroup.appendChild(copyBtn);
     buttonGroup.appendChild(editBtn);
     buttonGroup.appendChild(hapusBtn);
 
     div.appendChild(judul);
     div.appendChild(isi);
-    div.appendChild(buttonGroup); // ✅ masukkan semua tombol ke dalam group
+    div.appendChild(buttonGroup);
 
     daftar.appendChild(div);
   });
