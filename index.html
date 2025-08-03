@@ -10,6 +10,11 @@
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="manifest" href="manifest.json" />
  <style>
+   .highlight {
+  background-color: yellow;
+  font-weight: bold;
+}
+
   body {
     font-family: sans-serif;
     background-color: #f0f4ff;
@@ -375,6 +380,22 @@ function hapusTemplate(index) {
     const isDark = body.getAttribute("data-theme") === "dark";
     body.setAttribute("data-theme", isDark ? "light" : "dark");
   }
+function toggleFavorite(index) {
+  templates[index].favorite = !templates[index].favorite;
+  saveTemplates();
+  renderTemplates();
+}
+  function highlightSearch(text, searchTerm) {
+  if (!searchTerm) return text;
+  const regex = new RegExp(`(${searchTerm})`, "gi");
+  return text.replace(regex, "<span class='highlight'>$1</span>");
+}
+  function generateAISuggestion(topic) {
+  const suggestion = `Hai! Ini template untuk topik: ${topic}...`;
+  templates.unshift({ title: `Saran: ${topic}`, content: suggestion, favorite: false });
+  saveTemplates();
+  renderTemplates();
+}
 
   tampilkanTemplate();
 </script>
