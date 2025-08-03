@@ -277,7 +277,8 @@ function tampilkanTemplate() {
       } else {
         // MODE BACA
         const judul = document.createElement("strong");
-        judul.innerText = t.judul;
+      judul.innerHTML = highlightSearch(escapeHtml(t.judul), query);
+        isi.innerHTML = highlightSearch(escapeHtml(t.isi), query);
 
         const isi = document.createElement("p");
         isi.className = "template-content";
