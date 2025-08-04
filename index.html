@@ -163,6 +163,21 @@
     background-color: #2a2a2a;
     color: #f0f4ff;
   }
+   .favorite-icon {
+  cursor: pointer;
+  font-size: 18px;
+  margin-right: 8px;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+.favorite-icon:hover {
+  transform: scale(1.2);
+}
+.judul-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 </style>
 </head>
 <body>
@@ -238,81 +253,87 @@ function tampilkanTemplate() {
   daftar.innerHTML = "";
 
   templates
-    .filter(t => t.judul.toLowerCase().includes(query) || t.isi.toLowerCase().includes(query))
-    .forEach((t, index) => {
-      const container = document.createElement("div");
-      container.className = "template-item";
+  .sort((a, b) => (b.favorite === true) - (a.favorite === true)) // ⬅️ favorite diurutkan ke atas
+  .filter(t => t.judul.toLowerCase().includes(query) || t.isi.toLowerCase().includes(query))
+  .forEach((t, index) => {
+  const container = document.createElement("div");
+  container.className = "template-item";
 
-      if (editingIndex === index) {
-        // MODE EDIT
-        const inputJudul = document.createElement("input");
-        inputJudul.type = "text";
-        inputJudul.value = t.judul;
-        inputJudul.placeholder = "Judul Template";
+  if (editingIndex === index) {
+    const inputJudul = document.createElement("input");
+    inputJudul.type = "text";
+    inputJudul.value = t.judul;
+    inputJudul.placeholder = "Judul Template";
 
-        const textarea = document.createElement("textarea");
-        textarea.value = t.isi;
-        textarea.rows = 5;
-        textarea.style.width = "100%";
-        textarea.style.marginTop = "8px";
+    const textarea = document.createElement("textarea");
+    textarea.value = t.isi;
+    textarea.rows = 5;
+    textarea.style.width = "100%";
+    textarea.style.marginTop = "8px";
 
-        container.appendChild(inputJudul);
-        container.appendChild(textarea);
+    container.appendChild(inputJudul);
+    container.appendChild(textarea);
 
-        // Deteksi klik luar => simpan otomatis
-        const handleClickLuar = (e) => {
-          if (!container.contains(e.target)) {
-            document.removeEventListener("click", handleClickLuar);
-            templates[index].judul = inputJudul.value.trim() || "Tanpa Judul";
-            templates[index].isi = textarea.value.trim();
-            editingIndex = null;
-            localStorage.setItem("templates", JSON.stringify(templates));
-            tampilkanTemplate();
-          }
-        };
-        setTimeout(() => {
-          document.addEventListener("click", handleClickLuar);
-        }, 0);
-
-      } else {
-        // MODE BACA
-        const judul = document.createElement("strong");
-judul.innerHTML = highlightSearch(escapeHtml(t.judul), query);
-
-const isi = document.createElement("p");
-isi.className = "template-content";
-isi.innerHTML = highlightSearch(escapeHtml(t.isi), query);
-
-        const tombolDiv = document.createElement("div");
-        tombolDiv.className = "template-buttons";
-
-        const salinBtn = document.createElement("button");
-        salinBtn.innerText = "Salin";
-        salinBtn.onclick = () => salinTemplate(t.isi);
-
-        const editBtn = document.createElement("button");
-        editBtn.innerText = "Edit";
-        editBtn.onclick = () => {
-          editingIndex = index;
-          tampilkanTemplate();
-        };
-
-        const hapusBtn = document.createElement("button");
-        hapusBtn.innerText = "Hapus";
-        hapusBtn.onclick = () => hapusTemplate(index);
-
-        tombolDiv.appendChild(salinBtn);
-        tombolDiv.appendChild(editBtn);
-        tombolDiv.appendChild(hapusBtn);
-
-        container.appendChild(judul);
-        container.appendChild(isi);
-        container.appendChild(tombolDiv);
+    const handleClickLuar = (e) => {
+      if (!container.contains(e.target)) {
+        document.removeEventListener("click", handleClickLuar);
+        templates[index].judul = inputJudul.value.trim() || "Tanpa Judul";
+        templates[index].isi = textarea.value.trim();
+        editingIndex = null;
+        localStorage.setItem("templates", JSON.stringify(templates));
+        tampilkanTemplate();
       }
+    };
+    setTimeout(() => {
+      document.addEventListener("click", handleClickLuar);
+    }, 0);
+  } else {
+    const favoriteIcon = document.createElement("span");
+    favoriteIcon.className = "favorite-icon";
+    favoriteIcon.innerText = t.favorite ? "⭐" : "☆";
+    favoriteIcon.onclick = () => toggleFavorite(index);
 
-      daftar.appendChild(container);
-    });
-}
+    const judul = document.createElement("strong");
+    judul.innerHTML = highlightSearch(escapeHtml(t.judul), query);
+
+    const judulWrapper = document.createElement("div");
+    judulWrapper.className = "judul-wrapper";
+    judulWrapper.appendChild(favoriteIcon);
+    judulWrapper.appendChild(judul);
+    container.appendChild(judulWrapper);
+
+    const isi = document.createElement("p");
+    isi.className = "template-content";
+    isi.innerHTML = highlightSearch(escapeHtml(t.isi), query);
+
+    const tombolDiv = document.createElement("div");
+    tombolDiv.className = "template-buttons";
+
+    const salinBtn = document.createElement("button");
+    salinBtn.innerText = "Salin";
+    salinBtn.onclick = () => salinTemplate(t.isi);
+
+    const editBtn = document.createElement("button");
+    editBtn.innerText = "Edit";
+    editBtn.onclick = () => {
+      editingIndex = index;
+      tampilkanTemplate();
+    };
+
+    const hapusBtn = document.createElement("button");
+    hapusBtn.innerText = "Hapus";
+    hapusBtn.onclick = () => hapusTemplate(index);
+
+    tombolDiv.appendChild(salinBtn);
+    tombolDiv.appendChild(editBtn);
+    tombolDiv.appendChild(hapusBtn);
+
+    container.appendChild(isi);
+    container.appendChild(tombolDiv);
+  }
+
+  daftar.appendChild(container);
+});
 
 function salinTemplate(teks) {
   navigator.clipboard.writeText(teks).catch(() => {
