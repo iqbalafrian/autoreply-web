@@ -196,7 +196,7 @@
 
 <script>
   let templates = [];
-
+  
   try {
     const stored = JSON.parse(localStorage.getItem("templates"));
     if (Array.isArray(stored)) {
@@ -277,12 +277,11 @@ function tampilkanTemplate() {
       } else {
         // MODE BACA
         const judul = document.createElement("strong");
-      judul.innerHTML = highlightSearch(escapeHtml(t.judul), query);
-        isi.innerHTML = highlightSearch(escapeHtml(t.isi), query);
+judul.innerHTML = highlightSearch(escapeHtml(t.judul), query);
 
-        const isi = document.createElement("p");
-        isi.className = "template-content";
-        isi.innerText = t.isi;
+const isi = document.createElement("p");
+isi.className = "template-content";
+isi.innerHTML = highlightSearch(escapeHtml(t.isi), query);
 
         const tombolDiv = document.createElement("div");
         tombolDiv.className = "template-buttons";
@@ -381,21 +380,24 @@ function hapusTemplate(index) {
     const isDark = body.getAttribute("data-theme") === "dark";
     body.setAttribute("data-theme", isDark ? "light" : "dark");
   }
+  
 function toggleFavorite(index) {
   templates[index].favorite = !templates[index].favorite;
-  saveTemplates();
-  renderTemplates();
+  localStorage.setItem("templates", JSON.stringify(templates));
+  tampilkanTemplate();
 }
+  
   function highlightSearch(text, searchTerm) {
   if (!searchTerm) return text;
   const regex = new RegExp(`(${searchTerm})`, "gi");
   return text.replace(regex, "<span class='highlight'>$1</span>");
 }
+  
   function generateAISuggestion(topic) {
   const suggestion = `Hai! Ini template untuk topik: ${topic}...`;
-  templates.unshift({ title: `Saran: ${topic}`, content: suggestion, favorite: false });
-  saveTemplates();
-  renderTemplates();
+  templates.unshift({ judul: `Saran: ${topic}`, isi: suggestion });
+  localStorage.setItem("templates", JSON.stringify(templates));
+  tampilkanTemplate();
 }
 
   tampilkanTemplate();
